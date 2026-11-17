@@ -1,0 +1,12 @@
+{
+  "appId": "com.dimmeringvale.chronicles",
+  "appName": "Dimmering Vale",
+  "webDir": "www",
+  "android": {
+    "allowMixedContent": true,
+    "backgroundColor": "#0f0b08"
+  },
+  "server": {
+    "androidScheme": "https"
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "name": "medieval-ai-rpg",
+  "version": "1.0.0",
+  "description": "Chat-based Medieval Dark Fantasy AI RPG",
+  "main": "index.js",
+  "scripts": {
+    "start": "node server/index.js",
+    "test": "node --test \"tests/*.test.js\"",
+    "cap:sync": "npm run build:web && npx cap sync android",
+    "build:web": "node scripts/build-web.mjs"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^1.9.0",
+    "@capacitor/android": "^7.6.10",
+    "@capacitor/app": "^7.1.2",
+    "@capacitor/core": "^7.6.10",
+    "express": "^4.22.3"
+  },
+  "type": "module",
+  "devDependencies": {
+    "@capacitor/cli": "^7.6.10",
+    "@fontsource/amiri": "^5.3.0",
+    "@fontsource/cinzel": "^5.3.0",
+    "@fontsource/cinzel-decorative": "^5.3.0",
+    "@fontsource/im-fell-english": "^5.3.0",
+    "@fontsource/reem-kufi": "^5.3.0"
+  }
+}
