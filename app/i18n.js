@@ -1,0 +1,52 @@
+// UI strings. Game content strings live with the world data.
+export const UI = {
+  tapToBegin: { ar: 'انقر لتبدأ', en: 'Tap to begin' },
+  title: { ar: 'حوليات وادي الغسق', en: 'Chronicles of the Dimmering Vale' },
+  subtitle: { ar: 'لعبة تقمّص أدوار في عالم مظلم من العصور الوسطى', en: 'A dark medieval role-playing chronicle' },
+  newChronicle: { ar: 'حولية جديدة', en: 'New chronicle' },
+  continue: { ar: 'متابعة', en: 'Continue' },
+  settings: { ar: 'الإعدادات', en: 'Settings' },
+  createTitle: { ar: 'من أنت؟', en: 'Who are you?' },
+  name: { ar: 'الاسم', en: 'Name' },
+  pronoun: { ar: 'كيف يُشار إليك', en: 'How should the world refer to you' },
+  gUnspecified: { ar: 'دون تحديد', en: 'Unspecified' }, gMale: { ar: 'رجل', en: 'Man' }, gFemale: { ar: 'امرأة', en: 'Woman' },
+  background: { ar: 'الماضي', en: 'Background' },
+  attributes: { ar: 'الخصائص', en: 'Attributes' },
+  pointsLeft: { ar: 'نقاط متبقية: {n}', en: 'Points left: {n}' },
+  back: { ar: 'رجوع', en: 'Back' },
+  begin: { ar: 'ابدأ الحولية', en: 'Begin the chronicle' },
+  nameRequired: { ar: 'اكتب اسماً لشخصيتك.', en: 'Give your character a name.' },
+  inputPh: { ar: 'اكتب ما تفعله أو تقوله...', en: 'Write what you do or say...' },
+  tCharacter: { ar: 'الشخصية', en: 'Self' }, tInventory: { ar: 'المتاع', en: 'Pack' }, tJournal: { ar: 'الدفتر', en: 'Journal' },
+  tPeople: { ar: 'الناس', en: 'People' }, tMap: { ar: 'الخريطة', en: 'Map' }, tChronicle: { ar: 'التاريخ', en: 'History' },
+  writing: { ar: 'الراوي يكتب...', en: 'The chronicler writes...' },
+  day: { ar: 'اليوم {d}', en: 'Day {d}' },
+  level: { ar: 'المستوى', en: 'Level' }, health: { ar: 'الصحة', en: 'Health' }, hunger: { ar: 'الجوع', en: 'Hunger' }, fatigue: { ar: 'التعب', en: 'Fatigue' },
+  silver: { ar: 'فضة', en: 'silver' }, skills: { ar: 'المهارات', en: 'Skills' }, stats: { ar: 'الخصائص', en: 'Attributes' },
+  reputation: { ar: 'السمعة', en: 'Reputation' }, repLocal: { ar: 'محلية', en: 'Local' }, repPolitical: { ar: 'سياسية', en: 'Political' }, repMilitary: { ar: 'عسكرية', en: 'Military' },
+  repCommercial: { ar: 'تجارية', en: 'Commercial' }, repCriminal: { ar: 'إجرامية', en: 'Criminal' },
+  equipped: { ar: 'مُجهَّز', en: 'equipped' }, empty: { ar: 'لا شيء بعد.', en: 'Nothing yet.' },
+  quests: { ar: 'المهام', en: 'Tasks' }, knowledge: { ar: 'ما تعرفه', en: 'What you know' }, done: { ar: 'منجزة', en: 'done' }, failed: { ar: 'فاشلة', en: 'failed' }, active: { ar: 'جارية', en: 'active' },
+  here: { ar: 'هنا', en: 'here' }, minutes: { ar: '{n} دقيقة', en: '{n} min' }, youAreHere: { ar: 'أنت هنا', en: 'You are here' },
+  chronicleIntro: { ar: 'ما صار جزءاً من تاريخ الوادي.', en: 'What has become part of the vale\'s history.' },
+  serverUrl: { ar: 'عنوان خادم الذكاء الاصطناعي', en: 'AI server address' },
+  serverNote: { ar: 'يحمل الخادم مفتاح الذكاء الاصطناعي. بدونه تعمل اللعبة بالراوي المحلي.', en: 'The server holds the AI key. Without it the game uses the built-in chronicler.' },
+  appToken: { ar: 'رمز التطبيق (اختياري)', en: 'App token (optional)' },
+  test: { ar: 'اختبار الاتصال', en: 'Test connection' },
+  music: { ar: 'الموسيقى', en: 'Music' }, volume: { ar: 'مستوى الصوت', en: 'Volume' }, textSpeed: { ar: 'سرعة ظهور النص', en: 'Text speed' },
+  language: { ar: 'اللغة', en: 'Language' }, on: { ar: 'تشغيل', en: 'On' }, off: { ar: 'إيقاف', en: 'Off' },
+  exportSave: { ar: 'تصدير الحفظ', en: 'Export save' }, importSave: { ar: 'استيراد حفظ', en: 'Import save' }, deleteSave: { ar: 'حذف الحفظ', en: 'Delete save' },
+  confirmDelete: { ar: 'اكتب "احذف" للتأكيد', en: 'Type "delete" to confirm' },
+  saved: { ar: 'حُفظت الحولية.', en: 'Chronicle saved.' },
+  aiOnline: { ar: 'الراوي: Claude', en: 'Narrator: Claude' }, aiOffline: { ar: 'الراوي المحلي', en: 'Built-in chronicler' },
+  aiFellBack: { ar: 'تعذّر الوصول إلى خادم الذكاء الاصطناعي؛ تابع الراوي المحلي.', en: 'Could not reach the AI server; the built-in chronicler continued.' },
+  connOk: { ar: 'متصل. النموذج: {m}', en: 'Connected. Model: {m}' }, connNoAi: { ar: 'الخادم يعمل لكن دون مفتاح ذكاء اصطناعي.', en: 'Server is up but has no AI key.' }, connFail: { ar: 'تعذّر الاتصال.', en: 'Could not connect.' },
+  companions: { ar: 'الرفاق', en: 'Companions' }, noCompanions: { ar: 'تسافر وحدك.', en: 'You travel alone.' },
+  toMenu: { ar: 'القائمة الرئيسية', en: 'Main menu' }, hint: { ar: 'اضغط على اسم لإضافته إلى ما تكتب.', en: 'Tap a name to add it to what you are writing.' },
+  playtime: { ar: 'حياة الشخصية', en: 'Life so far' }
+};
+export function t(key, lang, vars = {}) {
+  let s = UI[key]?.[lang] ?? UI[key]?.en ?? key;
+  for (const [k, v] of Object.entries(vars)) s = s.replace(`{${k}}`, v);
+  return s;
+}
