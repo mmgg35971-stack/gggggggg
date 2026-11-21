@@ -4438,6 +4438,7 @@ if IS_LOGIN_PLACE then
 	Tabs.NewImpel  = Window:AddTab('Impel')  -- [PRINCE HUB] new tab (main menu / Universe part)
 	Tabs.NewZyph   = Window:AddTab('Impel Down Zyph') -- [PRINCE HUB] original zyph script
 	Tabs.NewImpelTest = Window:AddTab('Auto Impel (test)') -- [PRINCE HUB] new engine + diagnostics
+	Tabs.PrinceAI = Window:AddTab('Prince AI') -- [PRINCE HUB v19] logic analysis engine
 	Tabs.Config = Window:AddTab('Config')
 else
 	Tabs.Main    = Window:AddTab('Main')
@@ -4452,6 +4453,7 @@ else
 	Tabs.NewImpel  = Window:AddTab('Impel')  -- [PRINCE HUB] new tab
 	Tabs.NewZyph   = Window:AddTab('Impel Down Zyph') -- [PRINCE HUB] original zyph script
 	Tabs.NewImpelTest = Window:AddTab('Auto Impel (test)') -- [PRINCE HUB] new engine + diagnostics
+	Tabs.PrinceAI = Window:AddTab('Prince AI') -- [PRINCE HUB v19] logic analysis engine
 	Tabs.Config  = Window:AddTab('Config')
 end
 

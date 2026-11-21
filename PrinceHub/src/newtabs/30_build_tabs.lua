@@ -92,6 +92,12 @@ function PrinceNewTabs.build(Library, Tabs, Window, SaveManager)
 		end)
 	end
 
+	-- ================= TAB: PRINCE AI [PRINCE HUB v19] =================
+	if Tabs.PrinceAI then
+		local okAI = PH_try("Prince AI tab", PrinceAI.buildTab, Tabs.PrinceAI, Library)
+		if not okAI then notify("Prince AI tab error (see Config > Prince Hub)", 6) end
+	end
+
 	-- ================= TAB: KAITUN =================
 	if Tabs.NewKaitun then
 		local T = Tabs.NewKaitun

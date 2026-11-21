@@ -1,5 +1,5 @@
 -- ============================================================
---  PRINCE HUB | ALL IN ONE   (v18)
+--  PRINCE HUB | ALL IN ONE   (v19)
 --  الواجهة = واجهة الهب الكامل، ومضاف لها تبويبات: Kaitun و Cupid و Waves و Impel
 --  و Impel Down Zyph و Auto Impel (test)
 --
@@ -30,7 +30,7 @@
 -- ############################################################
 -- CORE  [PRINCE HUB v18]
 -- ############################################################
-local PRINCE_HUB_VERSION = "v18"
+local PRINCE_HUB_VERSION = "v19"
 
 -- منع التشغيل مرتين: إذا الهب شغّال (واجهته موجودة) ما نحمّل نسخة ثانية فوقه،
 -- لأن نسختين يتعاركن على نفس الشخصية والريموتات. بعد Unload من Config يقبل يحمّل.
@@ -53,11 +53,12 @@ do
 end
 
 -- سجل أخطاء واحد لكل الهب (أخطاء الموديولات والتبويبات)، ينسخ من Config > Prince Hub
-local PH_Log = { entries = {}, max = 60 }
+local PH_Log = { entries = {}, max = 60, total = 0 } -- total = كل الأخطاء من البداية (حتى المنحذفة)
 getgenv().PrinceHubLog = PH_Log
 
 function PH_Log.add(where, msg)
 	local list = PH_Log.entries
+	PH_Log.total = PH_Log.total + 1
 	list[#list + 1] = { t = os.time(), where = tostring(where), msg = tostring(msg) }
 	while #list > PH_Log.max do table.remove(list, 1) end
 	warn("[Prince Hub] " .. tostring(where) .. ": " .. tostring(msg))

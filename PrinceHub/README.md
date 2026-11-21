@@ -1,6 +1,6 @@
 # Prince Hub (GPO)
 
-سكربت Roblox للعبة GPO بواجهة Linoria، وبيه تبويبات Kaitun و Cupid و Waves و Impel و Impel Down Zyph و Auto Impel (test).
+سكربت Roblox للعبة GPO بواجهة Linoria، وبيه تبويبات Kaitun و Cupid و Waves و Impel و Impel Down Zyph و Auto Impel (test) و **Prince AI** (ذكاء اصطناعي بالتحليل المنطقي، شوف `CHANGELOG.md`).
 
 ## الملف اللي تشغّله
 **`dist/PrinceHub_AllInOne.lua`**: ملف واحد فيه كلشي. لا تعدّل عليه مباشرة، لأنه ينبني من `src/`.
@@ -32,6 +32,8 @@ src/
     20_mini_toggle.lua  زر X والمربع P
     21_stats_overlay.lua نافذة الـ stats
     22_ui_scale.lua     حجم الواجهة للهاتف
+    23_ai_core.lua      Prince AI: العقل (حقائق fuzzy + قواعد + قرار + تعلم + أسئلة)، بدون Roblox
+    24_ai_game.lua      Prince AI: الحواس والأفعال والتبويب
     30_build_tabs.lua   بناء التبويبات
     40_boot.lua         تشغيل الموديولات المفعّلة
   99_boot.lua           BOOT

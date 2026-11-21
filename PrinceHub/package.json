@@ -1,12 +1,12 @@
 {
   "name": "prince-hub",
-  "version": "18.0.0",
+  "version": "19.0.0",
   "private": true,
   "description": "Prince Hub (GPO) - source split into modules, built into a single Lua file",
   "scripts": {
     "build": "node tools/build.js",
     "check": "node tools/build.js --check-only",
-    "test": "node tools/build.js --check-only && node tests/test_core.js && node tests/test_autohide.js"
+    "test": "node tools/build.js --check-only && node tests/test_core.js && node tests/test_autohide.js && node tests/test_ai_core.js && node tests/test_ai_game.js"
   },
   "devDependencies": {
     "fengari": "0.1.4",

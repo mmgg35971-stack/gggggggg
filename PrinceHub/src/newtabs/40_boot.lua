@@ -1,5 +1,7 @@
 -- يشغّل الموديولات المفعّلة بعد ما الهب يحمّل
 function PrinceNewTabs.boot()
+	-- [PRINCE HUB v19] Prince AI: يحلل بس (Advise) إلا إذا اخترت Auto-fix، فيشتغل حتى ويا PrinceHubAutoStart = false
+	if PrinceAI.enabled then PH_try("Prince AI start", PrinceAI.start) end
 	if PN_NoAuto then return end
 	if Kaitun.enabled then kaitunStart() end
 	if Cupid.enabled then cupidStart() end
