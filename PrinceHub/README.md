@@ -40,6 +40,7 @@ src/
   99_boot.lua           BOOT
 tools/
   build.js              يبني dist/ ويفحصه
+  preview.js            preview للواجهة: docs/preview/ (HTML + desktop.png + phone.png)
   check.js              فحص سنتاكس Luau
   lint.js               المتغيرات اللي ما معرّفة + حدود Luau (200 local / 200 upvalue)
   lint-baseline.json    الأسماء المسموحة (APIs الإكزكيوتر وغيرها)

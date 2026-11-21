@@ -42575,7 +42575,7 @@ function PN_Halloween.apply(Library)
 	local moon = hwMake("Frame", {
 		Name = "HWMoon",
 		Size = UDim2.fromOffset(16, 16),
-		Position = UDim2.new(1, -46, 0, 5),
+		Position = UDim2.new(1, -60, 0, 5), -- بعيد عن زر X (بالهاتف X يكبر)
 		BackgroundColor3 = Color3.fromRGB(255, 180, 90),
 		BorderSizePixel = 0,
 		ZIndex = 3,
@@ -42588,7 +42588,7 @@ function PN_Halloween.apply(Library)
 		Name = "HWProfile",
 		BackgroundTransparency = 1,
 		Position = UDim2.new(0.45, 0, 0, 1),
-		Size = UDim2.new(0.55, -54, 0, 23),
+		Size = UDim2.new(0.55, -68, 0, 23),
 		Font = Enum.Font.GothamBold,
 		TextSize = 12,
 		TextXAlignment = Enum.TextXAlignment.Right,
