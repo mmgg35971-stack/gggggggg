@@ -1,0 +1,15 @@
+{
+  "notes": [
+    "Names here are read as globals on purpose: executor detection (Delta, Wave...), executor APIs (HttpPost, protectgui, mouse2press), Linoria globals (Toggles, Options), Luau builtins (getfenv/setfenv).",
+    "dark/dark2: dead branch in the original zyph script (always nil).",
+    "isnightmarePlus: typo in the original zyph script (local is isNightmarePlus). Left as-is so the Mythical chest logic keeps the behaviour it had; see CHANGELOG."
+  ],
+  "allowedUndefined": [
+    "SELIWARE_LOADED", "seliware", "DELTA_LOADED", "Delta", "delta", "is_delta_closure",
+    "POTASSIUM_LOADED", "Potassium", "potassium", "WAVE_LOADED", "Wave", "wave", "is_wave_function",
+    "VELOCITY_LOADED", "Velocity", "velocity", "is_velocity_closure",
+    "HttpPost", "protectgui", "mouse2press", "mouse2release", "setfenv", "getfenv",
+    "Toggles", "Options",
+    "dark", "dark2", "isnightmarePlus"
+  ]
+}

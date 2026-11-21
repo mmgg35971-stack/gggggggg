@@ -1,0 +1,23 @@
+# ترتيب ملفات السكربت داخل الملف النهائي (من فوق لجوة)
+00_header.lua
+modules/01_Cupid.lua
+modules/02_Kaitun.lua
+modules/03_Waves.lua
+modules/04_Impel.lua
+modules/05_ImpelZyph.lua
+modules/06_ImpelTest.lua
+modules/07_Hub.lua
+newtabs/01_core.lua
+newtabs/02_state.lua
+newtabs/10_kaitun.lua
+newtabs/11_cupid.lua
+newtabs/12_waves.lua
+newtabs/13_impel.lua
+newtabs/14_zyph.lua
+newtabs/15_impeltest.lua
+newtabs/20_mini_toggle.lua
+newtabs/21_stats_overlay.lua
+newtabs/22_ui_scale.lua
+newtabs/30_build_tabs.lua
+newtabs/40_boot.lua
+99_boot.lua

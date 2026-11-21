@@ -1,0 +1,13 @@
+{
+  "name": "prince-hub",
+  "version": "18.0.0",
+  "private": true,
+  "description": "Prince Hub (GPO) - source split into modules, built into a single Lua file",
+  "scripts": {
+    "build": "node tools/build.js",
+    "check": "node tools/build.js --check-only"
+  },
+  "devDependencies": {
+    "luaparse": "0.3.1"
+  }
+}
