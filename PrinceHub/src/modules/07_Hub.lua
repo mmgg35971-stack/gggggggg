@@ -3983,7 +3983,7 @@ local ThemeManager = (function()
 		ThemeManager.DefaultTheme = 'Default'
 		ThemeManager.BuiltInThemes = {
 			['Default'] = { 1, httpService:JSONDecode('{"FontColor":"e9edfa","MainColor":"24273a","AccentColor":"f5bde6","BackgroundColor":"1e2030","OutlineColor":"363a4f"}') },
-			['Halloween'] = { 2, httpService:JSONDecode('{"FontColor":"fff0ff","MainColor":"1a0b2e","AccentColor":"ff7d14","BackgroundColor":"10081c","OutlineColor":"7819be"}') }, -- [PRINCE HUB v20]
+			['Halloween'] = { 2, httpService:JSONDecode('{"FontColor":"f5f0fa","MainColor":"2c2038","AccentColor":"ff7518","BackgroundColor":"211a2b","OutlineColor":"3a2d4a"}') }, -- [PRINCE HUB v21] Dark Enchanted Night
 		}
 
 		function ThemeManager:ApplyTheme(theme)

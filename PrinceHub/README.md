@@ -34,7 +34,7 @@ src/
     22_ui_scale.lua     حجم الواجهة للهاتف
     23_ai_core.lua      Prince AI: العقل (حقائق fuzzy + قواعد + قرار + تعلم + أسئلة)، بدون Roblox
     24_ai_game.lua      Prince AI: الحواس والأفعال والتبويب
-    25_halloween_ui.lua ثيم الهالوين (ألوان، gradient، 🎃، قمر، جزيئات)
+    25_halloween_ui.lua ثيم "Dark Enchanted Night" (شوف docs/DESIGN.md)
     30_build_tabs.lua   بناء التبويبات
     40_boot.lua         تشغيل الموديولات المفعّلة
   99_boot.lua           BOOT
@@ -45,7 +45,7 @@ tools/
   lint.js               المتغيرات اللي ما معرّفة + حدود Luau (200 local / 200 upvalue)
   lint-baseline.json    الأسماء المسموحة (APIs الإكزكيوتر وغيرها)
 tests/                  اختبارات تشغيل بـ Lua 5.3 (fengari)
-docs/                   سجل المحادثات القديمة
+docs/                   DESIGN.md (دليل التصميم) + preview/ + سجل المحادثات القديمة
 ```
 
 ## البناء والفحص

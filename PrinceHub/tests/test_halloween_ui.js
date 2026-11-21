@@ -16,6 +16,9 @@ UDim2 = { new = function(xs, xo, ys, yo) return { X = { Scale = xs, Offset = xo 
 UDim2.fromOffset = function(x, y) return UDim2.new(0, x, 0, y) end
 UDim2.fromScale = function(x, y) return UDim2.new(x, 0, y, 0) end
 ColorSequence = { new = pass }
+NumberSequence = { new = pass }
+NumberSequenceKeypoint = { new = pass }
+Vector2 = { new = function(x, y) return { X = x, Y = y } end }
 ColorSequenceKeypoint = { new = pass }
 TweenInfo = { new = pass }
 Enum = setmetatable({}, { __index = function(_, a) return setmetatable({}, { __index = function(_, b) return a .. "." .. b end }) end })
@@ -34,6 +37,7 @@ mt.__index = function(self, k)
   if k == "Parent" then return rawget(self, "_parent") end
   if p[k] ~= nil then return p[k] end
   for _, c in ipairs(rawget(self, "_kids")) do if c.Name == k then return c end end -- مثل Roblox: obj.Child
+  if k == "MouseEnter" or k == "MouseLeave" or k == "InputBegan" then local sg = signal(); p[k] = sg; return sg end
   return nil
 end
 mt.__newindex = function(self, k, v)
@@ -61,7 +65,7 @@ function Inst:SetAttribute(k, v) self._attr[k] = v end
 function Inst:GetAttribute(k) return self._attr[k] end
 function Inst:Destroy() self.Parent = nil end
 
--- نافذة Linoria وهمية
+-- نافذة Linoria وهمية (نفس الترتيب)
 local function mk(cls, props, parent) local o = Instance.new(cls); for k, v in pairs(props or {}) do o[k] = v end; o.Parent = parent; return o end
 SG = mk("ScreenGui", {})
 OUTER = mk("Frame", { Name = "Outer" }, SG)
@@ -71,23 +75,34 @@ local mso = mk("Frame", { Name = "MSO", Position = UDim2.new(0, 8, 0, 25) }, INN
 local msi = mk("Frame", { Name = "MSI" }, mso)
 TABBAR = mk("ScrollingFrame", { Name = "PrinceTabBar" }, msi)
 mk("UIListLayout", {}, TABBAR)
-TABBTN = mk("Frame", { Name = "TabBtn" }, TABBAR)
+MAINCOLOR = { r = 44, g = 32, b = 56 }
+TABBTN = mk("Frame", { Name = "TabBtn", BackgroundColor3 = MAINCOLOR }, TABBAR)
+mk("TextLabel", { Text = "Prince AI" }, TABBTN)
+TABBTN2 = mk("Frame", { Name = "TabBtn2", BackgroundColor3 = { r = 1, g = 1, b = 1 } }, TABBAR)
+mk("TextLabel", { Text = "Config" }, TABBTN2)
 mk("TextButton", { Name = "PrinceTabArrow" }, msi)
 CONTAINER = mk("Frame", { Name = "TabContainer" }, msi)
-local tf = mk("Frame", { Name = "TabFrame" }, CONTAINER)
-SIDE = mk("ScrollingFrame", { Name = "LeftSide" }, tf)
+TF = mk("Frame", { Name = "TabFrame", Visible = true, Position = UDim2.fromOffset(0, 0) }, CONTAINER)
+SIDE = mk("ScrollingFrame", { Name = "LeftSide" }, TF)
 mk("UIListLayout", {}, SIDE)
 BOX = mk("Frame", { Name = "BoxOuter" }, SIDE)
-mk("Frame", { Name = "BoxInner" }, BOX)
-CLOSE = mk("TextButton", { Name = "PrinceClose" }, OUTER)
-MINI = mk("TextButton", { Name = "PrinceMini", Text = "P" }, SG)
+local boxInner = mk("Frame", { Name = "BoxInner" }, BOX)
+HIGHLIGHT = mk("Frame", { Name = "Highlight", Size = UDim2.new(1, 0, 0, 2) }, boxInner)
+BOXTITLE = mk("TextLabel", { Text = "Prince AI", Position = UDim2.new(0, 4, 0, 2) }, boxInner)
+CLOSE = mk("TextButton", { Name = "PrinceClose", Text = "X" }, OUTER)
+MINI = mk("TextButton", { Name = "PrinceMini", Text = "P", Visible = true }, SG)
 mk("UICorner", {}, MINI); mk("UIStroke", {}, MINI)
 STATS = mk("ScreenGui", { Name = "PrinceStatsGui" })
-local sf = mk("Frame", { Name = "PrinceStats" }, STATS); mk("UIStroke", {}, sf)
+local sf = mk("Frame", { Name = "PrinceStats" }, STATS); mk("UIStroke", {}, sf); mk("UICorner", {}, sf)
 local top = mk("Frame", { Name = "Top" }, sf); mk("TextLabel", { Text = "Prince Stats" }, top)
 G.PrinceStatsGui = STATS
-Library = { MainWindowFrame = OUTER, ScreenGui = SG, RegistryMap = { [TITLE] = { Properties = { TextColor3 = "FontColor" } } },
-  GetDarkerColor = function(_, c) return c end }
+NOTIFY = mk("Frame", { Name = "NotificationArea" })
+REMOVED = {}
+SHOWN = 0
+Window = { Tabs = { ["Prince AI"] = { ShowTab = function() SHOWN = SHOWN + 1 end }, Config = { ShowTab = function() SHOWN = SHOWN + 1 end } } }
+Library = { MainWindowFrame = OUTER, ScreenGui = SG, NotificationArea = NOTIFY, MainColor = MAINCOLOR,
+  RegistryMap = { [TITLE] = { Properties = { TextColor3 = "FontColor" } }, [HIGHLIGHT] = { Properties = { BackgroundColor3 = "AccentColor" } }, [BOXTITLE] = { Properties = { TextColor3 = "FontColor" } } },
+  GetDarkerColor = function(_, c) return c end, RemoveFromRegistry = function(_, o) REMOVED[o] = true end }
 US = {}
 PrinceNewTabs = {}
 PN_LocalPlayer = { DisplayName = "Prince" }
@@ -96,34 +111,56 @@ function PN_statValue(n) return 420 end
 const body = `
 local R = {}
 local function check(n, c, x) R[#R + 1] = (c and "OK" or "FAIL") .. "\\t" .. n .. "\\t" .. tostring(x) end
-check("default theme is Halloween", PrinceNewTabs.theme == "Halloween" and US.theme == "Halloween")
+local C = PN_Halloween.C
+check("default theme is Halloween + motion on", PrinceNewTabs.theme == "Halloween" and US.theme == "Halloween" and US.motion == true)
+check("tokens from the prompt", C.bg.r == 11 and C.primary.r == 255 and C.primary.g == 117 and C.lavender.r == 196 and C.text.r == 245)
 PrinceNewTabs.applyPalette(Library)
-check("palette: orange accent", Library.AccentColor.r == 255 and Library.AccentColor.g == 125)
-check("palette: purple outline + dark bg", Library.OutlineColor.r == 120 and Library.BackgroundColor.r == 16)
-PN_Halloween.apply(Library)
-check("title: pumpkin + Fantasy", TITLE.Text == "🎃 PRINCE HUB" and TITLE.Font == "Font.Fantasy", TITLE.Text)
-check("title color follows theme accent", Library.RegistryMap[TITLE].Properties.TextColor3 == "AccentColor")
-check("rounded window", INNER:FindFirstChild("HWCorner") ~= nil and OUTER.BackgroundTransparency == 1)
-check("gradient stroke on window", INNER:FindFirstChild("HWStroke") and INNER.HWStroke:FindFirstChildOfClass("UIGradient") ~= nil)
-check("gradient background", INNER:FindFirstChild("HalloweenBG") and INNER.HalloweenBG:FindFirstChildOfClass("UIGradient") ~= nil)
-check("moon", INNER:FindFirstChild("HWMoon") ~= nil)
-check("player card", INNER:FindFirstChild("HWProfile") and INNER.HWProfile.Text:find("Prince", 1, true) and INNER.HWProfile.Text:find("420", 1, true), INNER.HWProfile and INNER.HWProfile.Text)
-check("tab button styled", TABBTN:GetAttribute("HWStyled") == true and TABBTN:FindFirstChild("HWCorner") ~= nil)
-check("groupbox styled", BOX:GetAttribute("HWStyled") == true and BOX.BorderSizePixel == 0 and BOX:FindFirstChild("HWStroke") ~= nil)
+check("palette: pumpkin accent only", Library.AccentColor == C.primary)
+check("palette: cards / raised / thin lines", Library.BackgroundColor == C.surface and Library.MainColor == C.raised and Library.OutlineColor == C.line)
+check("palette: extra registry colors", Library.HWLavender == C.lavender and Library.HWText2 == C.text2)
+Library.MainColor = MAINCOLOR -- نخلي مرجع التبويب المختار مثل Linoria
+PN_Halloween.apply(Library, Window)
+check("title: short display text in Fantasy", TITLE.Text == "PRINCE HUB" and TITLE.Font == "Font.Fantasy", TITLE.Text)
+check("no emoji in title", not TITLE.Text:find("[\\240-\\244]"))
+check("drawn pumpkin icon in header", INNER:FindFirstChild("HWPumpkin") ~= nil and INNER.HWPumpkin:FindFirstChild("Body") ~= nil)
+check("pumpkin has stem + carved face", INNER.HWPumpkin:FindFirstChild("Stem") and INNER.HWPumpkin.Body:FindFirstChild("Mouth") and INNER.HWPumpkin.Body:FindFirstChild("Eye"))
+check("rounded window + thin moonlit rim", INNER:FindFirstChild("HWCorner") and INNER:FindFirstChild("HWStroke") and INNER.HWStroke.Thickness == 1)
+check("soft window shadow", OUTER:FindFirstChild("HWShadow") ~= nil)
+local bg = INNER:FindFirstChild("HalloweenBG")
+check("background layers: moon, clouds, fog", bg and bg:FindFirstChild("HWMoon") and bg:FindFirstChild("HWCloud") and bg:FindFirstChild("HWFog"))
+local card = INNER:FindFirstChild("HWProfile")
+check("profile: avatar initial + name + level pill", card and card.Avatar.Text == "P" and card.PlayerName.Text == "Prince" and card.Level ~= nil)
+check("close is a ghost button", CLOSE.BackgroundTransparency == 1 and CLOSE.MouseEnter ~= nil)
+check("content area is one calm surface", CONTAINER.BackgroundColor3 == C.bg2 and REMOVED[CONTAINER] == true)
+check("card: rounded, thin border", BOX:GetAttribute("HWStyled") and BOX.BorderSizePixel == 0 and BOX:FindFirstChild("HWStroke").Thickness == 1)
+check("card: short lavender accent instead of full orange line", HIGHLIGHT.Size.X.Offset == 18 and Library.RegistryMap[HIGHLIGHT].Properties.BackgroundColor3 == "HWLavender")
+check("card title: GothamBold lavender", BOXTITLE.Font == "Font.GothamBold" and BOXTITLE.TextColor3 == C.lavender)
+check("active tab: bar + orange text (not color only)", TABBTN.HWActiveBar.Visible == true and TABBTN:FindFirstChildOfClass("TextLabel").TextColor3 == C.primary)
+check("inactive tab: muted, no bar", TABBTN2.HWActiveBar.Visible == false and TABBTN2:FindFirstChildOfClass("TextLabel").TextColor3 == C.text2)
+Window.Tabs.Config:ShowTab()
+check("ShowTab still runs the original", SHOWN == 1)
+check("switching tab moves the indicator", TABBTN2.HWActiveBar.Visible == true and TABBTN.HWActiveBar.Visible == false)
+check("tab transition starts 6px lower", TF.Position.Y.Offset == 6)
 local late = Instance.new("Frame"); late.Parent = SIDE
-check("groupbox added later is styled", late:GetAttribute("HWStyled") == true)
+check("card added later is styled", late:GetAttribute("HWStyled") == true)
 local lateTab = Instance.new("Frame"); lateTab.Parent = TABBAR
 check("tab added later is styled", lateTab:GetAttribute("HWStyled") == true)
-check("mini button is a pumpkin", MINI.Text == "🎃")
-check("stats window themed", STATS.PrinceStats.Top:FindFirstChildOfClass("TextLabel").Text == "🎃 Prince Stats")
--- الجزيئات: نشغل الحلقة كم مرة
-for _ = 1, 5 do for _, co in ipairs(SPAWNED) do if coroutine.status(co) == "suspended" then coroutine.resume(co) end end end
+local toast = Instance.new("Frame"); toast.Parent = NOTIFY
+check("toast notifications rounded", toast:FindFirstChild("HWCorner") ~= nil)
+check("mini button: drawn pumpkin, no emoji", MINI.Text == "" and MINI:FindFirstChild("HWPumpkin") ~= nil and MINI:FindFirstChild("HWGlow") ~= nil)
+check("stats window: card style + pumpkin icon", STATS.PrinceStats.Top:FindFirstChild("HWPumpkin") ~= nil and STATS.PrinceStats.Top:FindFirstChildOfClass("TextLabel").TextColor3 == C.lavender)
+for _ = 1, 40 do for _, co in ipairs(SPAWNED) do if coroutine.status(co) == "suspended" then coroutine.resume(co) end end end
 local n = 0
-for _, c in ipairs(INNER.HalloweenBG:GetChildren()) do if c.Name == "HWParticle" then n = n + 1 end end
-check("particles spawn", n >= 3, n)
-check("particles capped", n <= PN_Halloween.maxParticles, n)
-local okTwice = pcall(PN_Halloween.apply, Library)
-check("apply twice is safe", okTwice and #INNER:GetChildren() == #INNER:GetChildren())
+for _, c in ipairs(bg:GetChildren()) do if c.Name == "HWEmber" then n = n + 1 end end
+check("embers: few and capped", n >= 1 and n <= PN_Halloween.maxEmbers, n)
+check("status colors", PrinceNewTabs.hwStatusColor("ok") == C.success and PrinceNewTabs.hwStatusColor("bad") == C.danger)
+US.motion = false
+TF.Position = UDim2.fromOffset(0, 0)
+Window.Tabs["Prince AI"]:ShowTab()
+check("reduced motion: no tab slide", TF.Position.Y.Offset == 0)
+local before = #INNER:GetChildren()
+pcall(PN_Halloween.apply, Library, Window)
+check("apply twice is safe", #INNER:GetChildren() == before)
 return table.concat(R, "\\n")
 `;
 function run(extra) {

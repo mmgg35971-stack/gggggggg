@@ -1,83 +1,113 @@
 <!doctype html><html><head><meta charset="utf-8"><title>Prince Hub preview</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inconsolata:wght@400;700&family=Fondamento&family=Noto+Color+Emoji&family=Montserrat:wght@700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inconsolata:wght@400;700&family=Fondamento&family=Montserrat:wght@500;700&display=swap">
 <style>
-:root{--white:#fff0ff;--dark:#10081c;--main:#1a0b2e;--orange:#ff7d14;--purple:#7819be;--pink:#d23cff}
+:root{--bg:#0B0A10;--bg2:#15131D;--surface:#211A2B;--raised:#2C2038;--line:#3A2D4A;--primary:#FF7518;--ember:#FF9A3D;--purple:#8B5CF6;
+ --lavender:#C4A7FF;--text:#F5F0FA;--text2:#B5ADBF;--muted:#827A8B;--success:#75D6A1;--warning:#F2C66D;--danger:#F06A75;--moon:#F3E9D2}
 *{box-sizing:border-box;margin:0;padding:0}
-body{width:100vw;height:100vh;overflow:hidden;font-family:Inconsolata,'Noto Color Emoji',monospace;color:var(--white);
+body{width:100vw;height:100vh;overflow:hidden;font-family:Inconsolata,monospace;color:var(--text);
  background:radial-gradient(ellipse at 70% 20%,#2c3e3a 0,#18222a 45%,#0b0f14 100%)}
 .scene{position:absolute;inset:0}
 .scene:after{content:'';position:absolute;left:0;right:0;bottom:0;height:28%;background:linear-gradient(#1d2b22,#121a14);opacity:.9}
-.hint{position:absolute;left:12px;bottom:10px;z-index:5;font:12px Montserrat,sans-serif;color:#9fb0b8;opacity:.8}
+.hint{position:absolute;left:12px;bottom:10px;z-index:5;font:500 12px Montserrat,sans-serif;color:#9fb0b8;opacity:.8}
 .stage{position:absolute;left:50%;top:50%;width:640px;height:600px;transform-origin:center;z-index:3}
-.win{position:absolute;inset:0;border-radius:14px;overflow:hidden;padding:2px;
- background:conic-gradient(from 120deg,var(--purple),var(--orange),var(--pink),var(--purple))}
-.bg{position:absolute;inset:2px;border-radius:12px;background:linear-gradient(135deg,#0c0419,#370a50);overflow:hidden}
-.pt{position:absolute;font-family:'Noto Color Emoji',sans-serif;color:var(--orange);pointer-events:none}
-.title{position:absolute;left:9px;top:0;height:25px;line-height:27px;font:18px Fondamento,'Noto Color Emoji',serif;color:var(--orange);
- -webkit-text-stroke:.6px #460064;text-shadow:0 0 2px #460064,1px 1px 0 #460064,-1px -1px 0 #460064;z-index:2}
-.profile{position:absolute;right:54px;top:1px;height:23px;line-height:23px;font:700 12px Montserrat,'Noto Color Emoji',sans-serif;z-index:2}
-.moon{position:absolute;right:46px;top:5px;width:16px;height:16px;border-radius:50%;background:#ffb45a;box-shadow:0 0 0 2px var(--orange),0 0 10px #ff7d1488;z-index:2;display:none}
-.profile{right:82px}.moon{display:block;right:58px}
-.close{position:absolute;right:20px;top:3px;width:20px;height:20px;background:var(--purple);border:1px solid var(--pink);border-radius:4px;
- font:700 13px Montserrat,sans-serif;text-align:center;line-height:18px;z-index:2}
-.msi{position:absolute;left:10px;top:27px;right:10px;bottom:10px;border-radius:10px;background:rgba(16,8,28,.55)}
+.shadow{position:absolute;inset:4px -4px -8px -4px;border-radius:16px;background:rgba(0,0,0,.45);filter:blur(6px)}
+.win{position:absolute;inset:0;border-radius:12px;overflow:hidden;border:1px solid var(--line);box-shadow:inset 0 1px 0 rgba(196,167,255,.45)}
+.bg{position:absolute;inset:0;background:linear-gradient(180deg,var(--bg),var(--bg2));overflow:hidden}
+.glow{position:absolute;border-radius:50%}
+.glow.p1{width:350px;height:350px;left:-175px;bottom:-175px;background:radial-gradient(circle,rgba(139,92,246,.16),rgba(139,92,246,0) 70%)}
+.glow.p2{width:240px;height:240px;left:-120px;bottom:-120px;background:radial-gradient(circle,rgba(139,92,246,.12),rgba(139,92,246,0) 70%)}
+.glow.o1{width:300px;height:300px;right:-80px;top:-140px;background:radial-gradient(circle,rgba(255,154,61,.10),rgba(255,154,61,0) 70%)}
+.moon{position:absolute;width:150px;height:150px;right:40px;top:-64px;border-radius:50%;background:rgba(243,233,210,.14)}
+.halo{position:absolute;width:200px;height:200px;right:15px;top:-89px;border-radius:50%;background:rgba(196,167,255,.035)}
+.cr{position:absolute;border-radius:50%;background:rgba(21,19,29,.09)}.cr.a{width:26px;height:26px;left:38px;top:72px}.cr.b{width:16px;height:16px;left:92px;top:98px}
+.cloud{position:absolute;border-radius:99px;background:var(--bg2)}
+.cloud.c1{width:170px;height:22px;right:80px;top:46px;opacity:.65}.cloud.c2{width:120px;height:16px;right:20px;top:22px;opacity:.55}
+.fog{position:absolute;left:-30%;width:160%;background:linear-gradient(180deg,rgba(196,167,255,0),rgba(196,167,255,.08))}
+.fog.f1{height:90px;bottom:0}.fog.f2{height:110px;bottom:0;left:-55%;opacity:.8}
+.em{position:absolute;border-radius:50%;background:var(--ember)}
+.head{position:absolute;left:9px;top:4px;height:18px;display:flex;align-items:center;gap:5px;z-index:2}
+.title{font:18px Fondamento,serif;color:var(--primary);line-height:18px;margin-top:1px}
+.pk{position:relative;display:inline-block;flex:none}
+.pk-body{position:absolute;left:0;right:0;bottom:0;height:80%;border-radius:50%;background:linear-gradient(180deg,var(--ember),#C2410C)}
+.pk-stem{position:absolute;left:50%;top:0;width:14%;height:26%;min-width:2px;background:#5B7F3A;border-radius:3px;transform:translateX(-30%) rotate(12deg);z-index:1}
+.rib{position:absolute;top:10%;height:80%;width:8%;min-width:1px;border-radius:9px;background:rgba(194,65,12,.45)}.rib.a{left:27%}.rib.b{left:65%}
+.eye{position:absolute;width:16%;height:20%;top:32%;background:#FFD27A;transform:rotate(45deg)}.eye.a{left:24%}.eye.b{left:60%}
+.mouth{position:absolute;left:27%;width:46%;height:12%;top:64%;border-radius:9px;background:#FFD27A}
+.profile{position:absolute;right:34px;top:3px;height:19px;display:flex;align-items:center;gap:6px;z-index:2;font:500 12px Montserrat,sans-serif}
+.av{width:18px;height:18px;border-radius:50%;background:var(--raised);border:1px solid rgba(139,92,246,.7);color:var(--lavender);font:700 11px Montserrat;display:flex;align-items:center;justify-content:center}
+.pname{color:var(--text2)}
+.pill{height:16px;line-height:16px;padding:0 7px;border-radius:99px;background:var(--raised);color:var(--ember);font:700 11px Montserrat}
+.close{position:absolute;right:5px;top:3px;width:20px;height:20px;border-radius:4px;color:var(--text2);font:700 13px Montserrat,sans-serif;text-align:center;line-height:20px;z-index:2}
+.msi{position:absolute;left:8px;top:25px;right:8px;bottom:8px}
 .tabbar{position:absolute;left:24px;right:24px;top:8px;height:22px;overflow:hidden}
 .tabs{display:flex;gap:8px;position:absolute;right:0;top:0}
-.tab{height:21px;padding:0 6px;line-height:21px;font-size:14px;white-space:nowrap;background:var(--dark);border:1px solid rgba(120,25,190,.8);border-radius:6px}
-.tab.sel{background:var(--main);border-color:var(--orange);color:var(--orange)}
-.arrowbtn{position:absolute;top:8px;width:14px;height:21px;line-height:20px;text-align:center;font-size:14px;background:var(--dark);border:1px solid rgba(210,60,255,.7);border-radius:5px}
-.cont{position:absolute;left:8px;right:8px;top:30px;bottom:8px;border-radius:10px;background:rgba(26,11,46,.7);border:1px solid rgba(120,25,190,.75);overflow:hidden}
+.tab{position:relative;height:21px;padding:0 6px;line-height:21px;font-size:14px;white-space:nowrap;background:rgba(33,26,43,.65);border-radius:6px;color:var(--text2)}
+.tab.sel{background:var(--raised);color:var(--primary)}
+.tab .bar{display:none;position:absolute;left:20%;right:20%;bottom:0;height:2px;border-radius:2px;background:var(--primary)}
+.tab.sel .bar{display:block}
+.arrowbtn{position:absolute;top:8px;width:14px;height:21px;line-height:20px;text-align:center;font-size:14px;color:var(--text2);background:rgba(33,26,43,.65);border-radius:6px}
+.cont{position:absolute;left:0;right:0;top:30px;bottom:0;border-radius:12px;background:rgba(21,19,29,.88);border:1px solid rgba(58,45,74,.8);overflow:hidden}
 .side{position:absolute;top:7px;width:calc(50% - 10px);display:flex;flex-direction:column;gap:8px}
 .side.l{left:7px}.side.r{left:calc(50% + 5px)}
-.gb{position:relative;background:rgba(16,8,28,.88);border:1px solid rgba(210,60,255,.65);border-radius:8px;padding:0 4px 6px;overflow:hidden}
-.hl{position:absolute;left:0;right:0;top:0;height:2px;background:var(--orange)}
-.gbt{height:20px;line-height:22px;font-size:14px;padding-left:0}
+.gb{position:relative;background:var(--surface);border:1px solid rgba(58,45,74,.9);border-radius:8px;padding:0 4px 6px;overflow:hidden}
+.hl{position:absolute;left:8px;width:18px;top:0;height:2px;border-radius:2px;background:var(--lavender)}
+.gbt{height:20px;line-height:22px;font:700 13px Montserrat,sans-serif;color:var(--lavender)}
 .gbc{display:flex;flex-direction:column;gap:5px;padding-right:4px}
 .lbl{font-size:14px;line-height:15px;white-space:nowrap;overflow:hidden}
 .lbl.wrap{white-space:normal;word-break:break-word}
+.lbl.sec{color:var(--text)}
+.lbl.state{color:var(--ember)}
 .tgl{display:flex;align-items:center;gap:6px;font-size:14px;height:15px}
-.tgl .box{width:13px;height:13px;background:var(--main);border:1px solid var(--purple)}
-.tgl .box.on{background:var(--orange);border-color:#b3570e}
-.dd,.inp,.btn{height:20px;line-height:18px;font-size:14px;background:var(--main);border:1px solid var(--purple);outline:1px solid #000;padding:0 5px}
+.tgl .box{width:13px;height:13px;background:var(--raised);border:1px solid var(--line);outline:1px solid #000}
+.tgl .box.on{background:var(--primary);border-color:#b3570e}
+.dd,.inp,.btn{height:20px;line-height:18px;font-size:14px;background:var(--raised);border:1px solid var(--line);outline:1px solid #000;padding:0 5px}
 .dd{display:flex;justify-content:space-between}.dd .arrow{font-size:9px;opacity:.8}
-.inp{color:#b9a5c9}
+.inp{color:var(--muted)}
 .btn{text-align:center}
-.sld{position:relative;height:13px;background:var(--main);border:1px solid var(--purple);outline:1px solid #000;font-size:13px;line-height:11px;text-align:center}
-.sld .fill{position:absolute;left:0;top:0;bottom:0;background:var(--orange)}
+.sld{position:relative;height:13px;background:var(--raised);border:1px solid var(--line);outline:1px solid #000;font-size:13px;line-height:11px;text-align:center}
+.sld .fill{position:absolute;left:0;top:0;bottom:0;background:var(--primary)}
 .sld span{position:relative;text-shadow:0 0 2px #000,0 0 2px #000}
-.stats{position:absolute;left:20px;top:140px;width:230px;border-radius:6px;background:var(--dark);border:2px solid var(--orange);overflow:hidden;z-index:4}
-.stop{height:24px;display:flex;align-items:center;gap:4px;padding:0 4px 0 8px;background:linear-gradient(90deg,var(--purple),#370a50)}
-.stt{flex:1;font:16px Fondamento,'Noto Color Emoji',serif;color:var(--orange)}
-.sb{width:20px;height:18px;line-height:18px;text-align:center;background:var(--dark);border-radius:4px;font-size:14px}
-.srow{font-size:13px;height:16px;line-height:16px;padding:0 8px}.srow.h{color:var(--orange);font-weight:700;margin-top:3px}
-.stats{padding-bottom:4px}
-.mini{position:absolute;width:46px;height:46px;border-radius:50%;border:3px solid var(--orange);font:30px 'Noto Color Emoji';display:flex;align-items:center;justify-content:center;
- background:linear-gradient(var(--dark),#0a0512);z-index:4}
-.minicap{position:absolute;font:11px Montserrat,sans-serif;color:#cfd8dc;z-index:4;text-align:center;width:120px}
+.stats{position:absolute;left:20px;top:140px;width:230px;border-radius:8px;background:var(--surface);border:1px solid var(--line);overflow:hidden;z-index:4;padding-bottom:4px}
+.stop{height:24px;display:flex;align-items:center;gap:6px;padding:0 4px 0 8px;background:var(--raised)}
+.stt{flex:1;font:700 13px Montserrat,sans-serif;color:var(--lavender)}
+.sb{width:20px;height:18px;line-height:18px;text-align:center;background:var(--surface);color:var(--text2);border-radius:4px;font-size:14px}
+.srow{font-size:13px;height:16px;line-height:16px;padding:0 8px}.srow.h{color:var(--ember);font-weight:700;margin-top:3px}
+.toast{position:absolute;left:0;top:40px;height:21px;line-height:21px;padding:0 10px 0 9px;font-size:14px;z-index:6;border-radius:6px;
+ background:linear-gradient(90deg,#1f1729,var(--raised));border:1px solid var(--line)}
+.toast i{position:absolute;left:-1px;top:-1px;bottom:-1px;width:3px;border-radius:6px 0 0 6px;background:var(--primary)}
+.mini{position:absolute;width:46px;height:46px;border-radius:50%;background:rgba(33,26,43,.92);border:1.5px solid var(--line);z-index:4;
+ box-shadow:0 0 0 5px rgba(255,154,61,.16);display:flex;align-items:center;justify-content:center}
+.minicap{position:absolute;font:500 11px Montserrat,sans-serif;color:#cfd8dc;z-index:4;text-align:center;width:120px}
 </style></head><body>
 <div class="scene"></div>
 <div class="stage" id="stage">
+<div class="shadow"></div>
 <div class="win" id="win">
-  <div class="bg"><span class="pt" style="left:8%;top:70%;font-size:18px;opacity:0.75;transform:rotate(-25deg)">✦</span><span class="pt" style="left:30%;top:82%;font-size:20px;opacity:0.6;transform:rotate(-2deg)">🎃</span><span class="pt" style="left:52%;top:40%;font-size:14px;opacity:0.5;transform:rotate(21deg)">✦</span><span class="pt" style="left:74%;top:64%;font-size:22px;opacity:0.45;transform:rotate(-6deg)">👻</span><span class="pt" style="left:88%;top:22%;font-size:18px;opacity:0.55;transform:rotate(17deg)">🦇</span><span class="pt" style="left:18%;top:30%;font-size:12px;opacity:0.4;transform:rotate(-10deg)">✦</span><span class="pt" style="left:63%;top:88%;font-size:18px;opacity:0.35;transform:rotate(13deg)">🕸</span><span class="pt" style="left:92%;top:76%;font-size:14px;opacity:0.6;transform:rotate(-14deg)">✦</span><span class="pt" style="left:44%;top:12%;font-size:16px;opacity:0.3;transform:rotate(9deg)">🎃</span><span class="pt" style="left:80%;top:48%;font-size:12px;opacity:0.5;transform:rotate(-18deg)">✦</span></div>
-  <div class="title">🎃 PRINCE HUB</div>
-  <div class="profile">👑 Prince  •  LV. 420</div>
-  <div class="moon"></div>
+  <div class="bg">
+    <span class="glow p1"></span><span class="glow p2"></span><span class="glow o1"></span>
+    <span class="halo"></span><span class="moon"><i class="cr a"></i><i class="cr b"></i></span>
+    <span class="cloud c1"></span><span class="cloud c2"></span>
+    <span class="fog f1"></span><span class="fog f2"></span><span class="em" style="left:12%;top:78%;width:3px;height:3px;opacity:0.55"></span><span class="em" style="left:27%;top:64%;width:2px;height:2px;opacity:0.4"></span><span class="em" style="left:46%;top:84%;width:3px;height:3px;opacity:0.35"></span><span class="em" style="left:61%;top:58%;width:2px;height:2px;opacity:0.5"></span><span class="em" style="left:83%;top:72%;width:3px;height:3px;opacity:0.3"></span><span class="em" style="left:91%;top:88%;width:2px;height:2px;opacity:0.45"></span>
+  </div>
+  <div class="head"><span class="pk" style="width:16px;height:16px"><span class="pk-stem"></span><span class="pk-body"><i class="rib a"></i><i class="rib b"></i><i class="eye a"></i><i class="eye b"></i><i class="mouth"></i></span></span><span class="title">PRINCE HUB</span></div>
+  <div class="profile"><span class="av">P</span><span class="pname">Prince</span><span class="pill">LV 420</span></div>
   <div class="close">X</div>
   <div class="msi">
     <div class="arrowbtn" style="left:8px">&lt;</div>
-    <div class="tabbar"><div class="tabs" id="tabs"><div class="tab">Main</div><div class="tab">Fish</div><div class="tab">Misc</div><div class="tab">ESP</div><div class="tab">Dungeon</div><div class="tab">Farm</div><div class="tab">Kaitun</div><div class="tab">Cupid</div><div class="tab">Waves</div><div class="tab">Impel</div><div class="tab">Impel Down Zyph</div><div class="tab">Auto Impel (test)</div><div class="tab sel">Prince AI</div><div class="tab">Config</div></div></div>
+    <div class="tabbar"><div class="tabs" id="tabs"><div class="tab"><span>Main</span><i class="bar"></i></div><div class="tab"><span>Fish</span><i class="bar"></i></div><div class="tab"><span>Misc</span><i class="bar"></i></div><div class="tab"><span>ESP</span><i class="bar"></i></div><div class="tab"><span>Dungeon</span><i class="bar"></i></div><div class="tab"><span>Farm</span><i class="bar"></i></div><div class="tab"><span>Kaitun</span><i class="bar"></i></div><div class="tab"><span>Cupid</span><i class="bar"></i></div><div class="tab"><span>Waves</span><i class="bar"></i></div><div class="tab"><span>Impel</span><i class="bar"></i></div><div class="tab"><span>Impel Down Zyph</span><i class="bar"></i></div><div class="tab"><span>Auto Impel (test)</span><i class="bar"></i></div><div class="tab sel"><span>Prince AI</span><i class="bar"></i></div><div class="tab"><span>Config</span><i class="bar"></i></div></div></div>
     <div class="arrowbtn" style="right:8px">&gt;</div>
-    <div class="cont"><div class="side l"><div class="gb"><div class="hl"></div><div class="gbt">Prince AI</div><div class="gbc"><div class="lbl wrap">Logic engine: watches the game,</div><div class="lbl wrap">finds the problem and why, then fixes it.</div><div class="tgl"><span class="box on"></span>AI analysis</div><div class="lbl">Mode</div><div class="dd"><span>Advise</span><span class="arrow">▼</span></div><div class="lbl">Language</div><div class="dd"><span>EN</span><span class="arrow">▼</span></div><div class="tgl"><span class="box on"></span>Notifications</div><div class="lbl">Sure enough at (%)</div><div class="sld"><div class="fill" style="width:41.66666666666667%"></div><span>55/90</span></div></div></div><div class="gb"><div class="hl"></div><div class="gbt">Analysis</div><div class="gbc"><div class="lbl wrap">State: Stuck in place (88%) &lt;- path blocked (going back and forth)</div><div class="lbl wrap">Plan: Jump + lift 25 studs  [Stuck in place &lt;- path blocked (going back and forth), 79%, works 50% of 0 tries]</div><div class="lbl">Auto fixes left: 6 / 6  | mode Advise</div><div class="btn">Apply suggestion</div><div class="btn">Copy analysis</div></div></div></div><div class="side r"><div class="gb"><div class="hl"></div><div class="gbt">Thinking tree (why)</div><div class="gbc"><div class="lbl wrap"># Stuck in place 88%<br>  why: stuck: farm_active(100%) &amp; not fighting(98%) &amp; not waiting(100%) &amp; not network_lag(100%) &amp; not dead(100%) &amp; any[looping(100%)] =&gt; 88%<br>  cause: path blocked (going back and forth) 79% * | general 17% | low FPS 0% | hovering in the air 0%<br>  do: Jump + lift 25 studs (works 50%, prior)<br>facts:<br>  farm_active 100% (active: ImpelTest)<br>  in_dungeon 100% (place: dungeon)<br>  looping 100% (moved 900 but only 0 away (30s))</div></div></div><div class="gb"><div class="hl"></div><div class="gbt">Ask the AI</div><div class="gbc"><div class="lbl wrap">why / cause / plan / tree / history</div><div class="lbl wrap">advice / errors / progress / fps / learn</div><div class="lbl">Question</div><div class="inp">why stuck?</div><div class="lbl wrap">Problem: Stuck in place (88%)<br>Because:<br>- stuck: farm_active(100%) &amp; not fighting(98%) &amp; not waiting(100%) &amp; not network_lag(100%) &amp; not dead(100%) &amp; any[looping(100%)] =&gt; 88%<br>Most likely cause: path blocked (going back and forth) (79%)</div><div class="btn">Forget what it learned</div></div></div></div></div>
+    <div class="cont"><div class="side l"><div class="gb"><div class="hl"></div><div class="gbt">Prince AI</div><div class="gbc"><div class="lbl wrap sec">Logic engine: watches the game,</div><div class="lbl wrap sec">finds the problem and why, then fixes it.</div><div class="tgl"><span class="box on"></span>AI analysis</div><div class="lbl">Mode</div><div class="dd"><span>Advise</span><span class="arrow">▼</span></div><div class="lbl">Language</div><div class="dd"><span>EN</span><span class="arrow">▼</span></div><div class="tgl"><span class="box on"></span>Notifications</div><div class="lbl">Sure enough at (%)</div><div class="sld"><div class="fill" style="width:41.66666666666667%"></div><span>55/90</span></div></div></div><div class="gb"><div class="hl"></div><div class="gbt">Analysis</div><div class="gbc"><div class="lbl wrap state">State: Stuck in place (88%) &lt;- path blocked (going back and forth)</div><div class="lbl wrap">Plan: Jump + lift 25 studs  [Stuck in place &lt;- path blocked (going back and forth), 79%, works 50% of 0 tries]</div><div class="lbl sec">Auto fixes left: 6 / 6  | mode Advise</div><div class="btn">Apply suggestion</div><div class="btn">Copy analysis</div></div></div></div><div class="side r"><div class="gb"><div class="hl"></div><div class="gbt">Thinking tree (why)</div><div class="gbc"><div class="lbl wrap"># Stuck in place 88%<br>  why: stuck: farm_active(100%) &amp; not fighting(98%) &amp; not waiting(100%) &amp; not network_lag(100%) &amp; not dead(100%) &amp; any[looping(100%)] =&gt; 88%<br>  cause: path blocked (going back and forth) 79% * | general 17% | low FPS 0% | hovering in the air 0%<br>  do: Jump + lift 25 studs (works 50%, prior)<br>facts:<br>  farm_active 100% (active: ImpelTest)<br>  in_dungeon 100% (place: dungeon)<br>  looping 100% (moved 900 but only 0 away (30s))</div></div></div><div class="gb"><div class="hl"></div><div class="gbt">Ask the AI</div><div class="gbc"><div class="lbl wrap sec">why / cause / plan / tree / history</div><div class="lbl wrap sec">advice / errors / progress / fps / learn</div><div class="lbl">Question</div><div class="inp">why stuck?</div><div class="lbl wrap">Problem: Stuck in place (88%)<br>Because:<br>- stuck: farm_active(100%) &amp; not fighting(98%) &amp; not waiting(100%) &amp; not network_lag(100%) &amp; not dead(100%) &amp; any[looping(100%)] =&gt; 88%<br>Most likely cause: path blocked (going back and forth) (79%)</div><div class="btn">Forget what it learned</div></div></div></div></div>
   </div>
 </div></div>
 
 <div class="stats">
-  <div class="stop"><span class="stt">🎃 Prince Stats</span><span class="sb">-</span><span class="sb">X</span></div>
+  <div class="stop"><span class="pk" style="width:14px;height:14px"><span class="pk-stem"></span><span class="pk-body"><i class="rib a"></i><i class="rib b"></i><i class="eye a"></i><i class="eye b"></i><i class="mouth"></i></span></span><span class="stt">Prince Stats</span><span class="sb">-</span><span class="sb">X</span></div>
   <div class="srow h">Auto Impel (test)</div>
   <div class="srow"><b>State</b>: Floor 2 - stage 3</div><div class="srow"><b>Where</b>: Dungeon - 2</div><div class="srow"><b>Stage</b>: 3</div><div class="srow"><b>Target</b>: Kelvin</div><div class="srow"><b>Kills</b>: 17</div><div class="srow"><b>Health</b>: OK (0 err/60s)</div>
 </div>
-<div class="mini" id="mini">🎃</div><div class="minicap" id="minicap">when the menu is hidden</div>
-<div class="hint">Prince Hub v20 preview (approximate: fonts differ a little from Roblox)</div>
+<div class="toast"><i></i>[AI] Stuck in place -> Jump + lift 25 studs</div>
+<div class="mini" id="mini"><span class="pk" style="width:30px;height:30px"><span class="pk-stem"></span><span class="pk-body"><i class="rib a"></i><i class="rib b"></i><i class="eye a"></i><i class="eye b"></i><i class="mouth"></i></span></span></div><div class="minicap" id="minicap">when the menu is hidden</div>
+<div class="hint">Prince Hub v21 preview - Dark Enchanted Night (approximate: fonts differ a little from Roblox)</div>
 <script>
 // نفس حساب PN_fitScale: min((W-10)/640, (H-50)/600) بين 0.3 و 1
 const W = innerWidth, H = innerHeight;
@@ -89,9 +119,13 @@ const mini = document.getElementById('mini'), cap = document.getElementById('min
 if (W < 900) {
   // مثل 22_ui_scale.lua: نافذة الـ stats تصغر بنفس النسبة بس مو أقل من 0.7
   stats.style.transform = 'scale(' + Math.min(1, Math.max(0.7, s)) + ')'; stats.style.transformOrigin = 'top left';
-  stats.style.top = '40px'; stats.style.left = '8px';
+  stats.style.top = '72px'; stats.style.left = '8px';
   mini.style.left = (W - 64) + 'px'; mini.style.top = (H - 92) + 'px'; cap.style.left = (W - 126) + 'px'; cap.style.top = (H - 40) + 'px';
   document.querySelector('.hint').style.fontSize = '9px';
+  // مثل PrinceApplyScale بـ 07_Hub.lua: كل ابن للـ ScreenGui يصغر بنفس النسبة (الإشعارات هم)،
+  // والزر المصغر مو أقل من 0.8 حتى ينضغط بسهولة
+  const toast = document.querySelector('.toast'); toast.style.transform = 'scale(' + s + ')'; toast.style.transformOrigin = 'top left';
+  mini.style.transform = 'scale(' + Math.max(s, 0.8) + ')';
   // مثل 22_ui_scale.lua: زر X يكبر حتى يبقى 80% من حجمه الطبيعي
   const x = document.querySelector('.close'); x.style.transform = 'scale(' + Math.max(1, 0.8 / s) + ')'; x.style.transformOrigin = 'top right';
 } else {

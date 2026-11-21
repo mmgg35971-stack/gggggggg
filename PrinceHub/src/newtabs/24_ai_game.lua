@@ -479,6 +479,14 @@ function PrinceAI.buildTab(T, Library)
 					return
 				end
 				lSummary:SetText("State: " .. B:summary())
+				-- لون الحالة (ويا النص، مو بداله): أخضر تمام، ذهبي خفيف، برتقالي متوسط، أحمر خطر
+				pcall(function()
+					local probs = B:problems()
+					local level = (#probs == 0) and ((B.facts.idle and B.facts.idle.cf >= 0.5) and "idle" or "ok")
+						or ({ "warn", "busy", "bad" })[probs[1].severity] or "warn"
+					local col = PrinceNewTabs.hwStatusColor and PrinceNewTabs.hwStatusColor(level)
+					if col and lSummary.TextLabel then lSummary.TextLabel.TextColor3 = col end
+				end)
 				lPlan:SetText("Plan: " .. B:planText() .. ((B.plan and PrinceAI.mode == "Auto-fix" and not B.plan.auto) and "  (needs you: Apply)" or ""))
 				lBudget:SetText("Auto fixes left: " .. B:budgetLeft() .. " / " .. B.autoBudget .. "  | mode " .. PrinceAI.mode)
 				lWhy:SetText(table.concat(B:explain(12), "\n"))

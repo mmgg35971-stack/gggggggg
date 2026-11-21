@@ -76,7 +76,7 @@ check('PH_try returns results', g('RESULT.ok1') === true && g('RESULT.a') === '5
 check('PH_try catches error', g('RESULT.ok2') === false && /boom/.test(g('RESULT.err')));
 check('error has traceback', /traceback/.test(g('RESULT.err')));
 check('error is logged once', g('RESULT.n') === '1' && g('RESULT.where') === 't2');
-check('report has version and error', /Prince Hub v20/.test(g('RESULT.report')) && /\[t2\] .*boom/.test(g('RESULT.report')));
+check('report has version and error', /Prince Hub v21/.test(g('RESULT.report')) && /\[t2\] .*boom/.test(g('RESULT.report')));
 check('log is capped at 60', g('RESULT.capped') === '60');
 
 console.log(`\n${pass} passed, ${fail} failed`);

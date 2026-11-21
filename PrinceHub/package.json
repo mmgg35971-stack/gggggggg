@@ -1,6 +1,6 @@
 {
   "name": "prince-hub",
-  "version": "20.0.0",
+  "version": "21.0.0",
   "private": true,
   "description": "Prince Hub (GPO) - source split into modules, built into a single Lua file",
   "scripts": {

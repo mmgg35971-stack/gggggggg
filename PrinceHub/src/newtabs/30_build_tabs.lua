@@ -64,6 +64,7 @@ function PrinceNewTabs.build(Library, Tabs, Window, SaveManager)
 			Box:AddDropdown("PN_UITheme", { -- [PRINCE HUB v20]
 				Values = { "Halloween", "Classic" }, Default = PrinceNewTabs.theme, Multi = false,
 				Text = "Theme (next load)",
+				Tooltip = "Halloween = Dark Enchanted Night. Classic = the old look",
 				Callback = function(v)
 					if v ~= "Halloween" and v ~= "Classic" then return end
 					if US.theme ~= v then
@@ -72,6 +73,11 @@ function PrinceNewTabs.build(Library, Tabs, Window, SaveManager)
 						notify("Theme " .. v .. ": re-execute the script to apply", 5)
 					end
 				end,
+			})
+			Box:AddToggle("PN_UIMotion", { -- [PRINCE HUB v21] تقليل الحركة
+				Text = "Animations", Default = US.motion ~= false,
+				Tooltip = "Fog, embers, glow and tab transitions. OFF = reduced motion",
+				Callback = function(v) US.motion = v; PN_save() end,
 			})
 			local errLabel = Box:AddLabel("Errors: 0")
 			Box:AddButton({
@@ -1027,6 +1033,6 @@ function PrinceNewTabs.build(Library, Tabs, Window, SaveManager)
 	end)
 
 	-- [PRINCE HUB v20] Halloween look (after every tab and groupbox exists)
-	PH_try("Halloween UI", PN_Halloween.apply, Library)
+	PH_try("Halloween UI", PN_Halloween.apply, Library, Window)
 end
 
