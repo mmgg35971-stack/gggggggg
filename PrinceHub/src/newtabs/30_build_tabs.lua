@@ -56,6 +56,42 @@ function PrinceNewTabs.build(Library, Tabs, Window, SaveManager)
 		end)
 	end
 
+	-- ================= Config: Prince Hub (النسخة + سجل الأخطاء) [PRINCE HUB v18] =================
+	if Tabs.Config then
+		pcall(function()
+			local Box = Tabs.Config:AddRightGroupbox("Prince Hub")
+			Box:AddLabel("Version: " .. PRINCE_HUB_VERSION)
+			local errLabel = Box:AddLabel("Errors: 0")
+			Box:AddButton({
+				Text = "Copy error log",
+				Func = function()
+					local text = PH_Log.report()
+					local copy = setclipboard or toclipboard
+					if copy then
+						pcall(copy, text)
+						notify("Error log copied (" .. #PH_Log.entries .. ")", 3)
+					else
+						print(text)
+						notify("No clipboard: log printed in console (F9)", 4)
+					end
+				end,
+			})
+			Box:AddButton({
+				Text = "Clear error log",
+				Func = function()
+					table.clear(PH_Log.entries)
+					notify("Error log cleared", 2)
+				end,
+			})
+			task.spawn(function()
+				while Library.ScreenGui and Library.ScreenGui.Parent do
+					pcall(function() errLabel:SetText("Errors: " .. #PH_Log.entries) end)
+					task.wait(2)
+				end
+			end)
+		end)
+	end
+
 	-- ================= TAB: KAITUN =================
 	if Tabs.NewKaitun then
 		local T = Tabs.NewKaitun

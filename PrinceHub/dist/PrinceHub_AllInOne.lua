@@ -1,25 +1,96 @@
 -- ============================================================
---  PRINCE HUB | ALL IN ONE
---  الواجهة = واجهة الهب الكامل، ومضاف لها 4 تبويبات: Kaitun و Cupid و Waves و Impel
+--  PRINCE HUB | ALL IN ONE   (v18)
+--  الواجهة = واجهة الهب الكامل، ومضاف لها تبويبات: Kaitun و Cupid و Waves و Impel
+--  و Impel Down Zyph و Auto Impel (test)
+--
+--  هذا الملف مبني من مجلد src/ بالأداة tools/build.js. لا تعدل الملف المبني،
+--  عدل الملف بـ src/ وبعدين ابنِ:  node tools/build.js
 --
 --  ترتيب الملف (دوّر على "MODULE:" أو "NEW TABS" أو "BOOT"):
---    1) MODULE: Cupid   -> سكربت Cupid Dungeon (يشتغل من تبويب Cupid)
---    2) MODULE: Kaitun  -> سكربت الكايتون الجديد (يشتغل من تبويب Kaitun)
---    3) MODULE: Waves   -> دنجن الأمواج، سولو/بارتي (يشتغل من تبويب Waves)
---    4) MODULE: Impel   -> سكربت zephyron للـ Impel Down بطيران الكايتون (تبويب Impel)
---    5) MODULE: Hub     -> الهب الكامل + الواجهة (أي سطر عدّلته مكتوب جنبه [PRINCE HUB])
---    6) NEW TABS        -> كود التبويبات الجديدة + زر X والمربع الصغير
---    7) BOOT            -> التشغيل
+--    0) CORE            -> النسخة + منع التشغيل مرتين + سجل الأخطاء  (src/00_header.lua)
+--    1) MODULE: Cupid      -> سكربت Cupid Dungeon            (src/modules/01_Cupid.lua)
+--    2) MODULE: Kaitun     -> سكربت الكايتون                  (src/modules/02_Kaitun.lua)
+--    3) MODULE: Waves      -> دنجن الأمواج، سولو/بارتي        (src/modules/03_Waves.lua)
+--    4) MODULE: Impel      -> zephyron بطيران الكايتون        (src/modules/04_Impel.lua)
+--    5) MODULE: ImpelZyph  -> zephyron الأصلي بدون تعديل      (src/modules/05_ImpelZyph.lua)
+--    6) MODULE: ImpelTest  -> Auto Impel (test)               (src/modules/06_ImpelTest.lua)
+--    7) MODULE: Hub        -> الهب الكامل + واجهة Linoria     (src/modules/07_Hub.lua)
+--    8) NEW TABS           -> التبويبات الجديدة + زر X و P    (src/newtabs/*.lua)
+--    9) BOOT               -> التشغيل                         (src/99_boot.lua)
+--  أي سطر متعدل بالهب مكتوب جنبه [PRINCE HUB]، والتعديلات الجديدة [PRINCE HUB v18].
 --
 --  اختياري قبل التحميل:
 --    getgenv().Config = { ... }                -- نفس الكونفك القديم
 --    getgenv().PrinceHubAutoStart = "Kaitun"   -- أو "Cupid" أو "Waves" أو "WavesParty" أو "Impel"
+--                                              -- أو "ImpelZyph" أو "ImpelTest"
 --                                              -- أو {"Kaitun","Cupid"} أو false
+--    getgenv().PrinceHubForceReload = true     -- يحمّل حتى لو الهب شغّال من قبل
 -- ============================================================
+
+-- ############################################################
+-- CORE  [PRINCE HUB v18]
+-- ############################################################
+local PRINCE_HUB_VERSION = "v18"
+
+-- منع التشغيل مرتين: إذا الهب شغّال (واجهته موجودة) ما نحمّل نسخة ثانية فوقه،
+-- لأن نسختين يتعاركن على نفس الشخصية والريموتات. بعد Unload من Config يقبل يحمّل.
+do
+	local prev = getgenv().PrinceHubInstance
+	local alive = false
+	if type(prev) == "table" and type(prev.alive) == "function" then
+		local ok, res = pcall(prev.alive)
+		alive = ok and res == true
+	end
+	if alive and getgenv().PrinceHubForceReload ~= true then
+		warn("[Prince Hub] already running (" .. tostring(prev.version) .. "). Unload it from Config first, or set getgenv().PrinceHubForceReload = true")
+		pcall(function()
+			local lib = getgenv().Library
+			if lib and lib.Notify then lib:Notify("Prince Hub is already running", 5) end
+		end)
+		return
+	end
+	getgenv().PrinceHubForceReload = nil
+end
+
+-- سجل أخطاء واحد لكل الهب (أخطاء الموديولات والتبويبات)، ينسخ من Config > Prince Hub
+local PH_Log = { entries = {}, max = 60 }
+getgenv().PrinceHubLog = PH_Log
+
+function PH_Log.add(where, msg)
+	local list = PH_Log.entries
+	list[#list + 1] = { t = os.time(), where = tostring(where), msg = tostring(msg) }
+	while #list > PH_Log.max do table.remove(list, 1) end
+	warn("[Prince Hub] " .. tostring(where) .. ": " .. tostring(msg))
+end
+
+function PH_Log.report()
+	local exec = "?"
+	pcall(function() if identifyexecutor then exec = tostring(identifyexecutor()) end end)
+	local out = {
+		"Prince Hub " .. PRINCE_HUB_VERSION .. " | PlaceId " .. tostring(game.PlaceId) .. " | JobId " .. tostring(game.JobId),
+		"Executor: " .. exec,
+		"Errors: " .. #PH_Log.entries,
+	}
+	for _, e in ipairs(PH_Log.entries) do
+		out[#out + 1] = os.date("%H:%M:%S", e.t) .. " [" .. e.where .. "] " .. e.msg
+	end
+	return table.concat(out, "\n")
+end
+
+-- يشغّل دالة محمية ويسجل الخطأ ويا الـ traceback إذا صار
+local function PH_try(where, fn, ...)
+	local res = table.pack(xpcall(fn, function(err)
+		return tostring(err) .. "\n" .. debug.traceback("", 2)
+	end, ...))
+	if not res[1] then
+		PH_Log.add(where, res[2])
+		return false, res[2]
+	end
+	return true, table.unpack(res, 2, res.n)
+end
 
 local Modules = {}
 local PrinceNewTabs = {}
-
 -- ############################################################
 -- MODULE: Cupid  |  Cupid Dungeon (config only)
 -- ############################################################
@@ -1877,6 +1948,10 @@ local function ensureBusoOnce()
 		pressKey(Enum.KeyCode.J, 0.08)
 	end)
 end
+-- [PRINCE HUB v18] forward declaration: equipWeapon uses it, but it is defined further down.
+-- Before this, Step 2 (equip from inventory) never ran because the name was nil here.
+local hasInventoryItemForEquip
+
 local function equipWeapon()
 	applyWeaponFromConfig()
 
@@ -3962,7 +4037,7 @@ local function hotbarOrBackpackHasItem(itemName)
 		or scan(inventoryFrame)
 end
 
-local function hasInventoryItemForEquip(itemName)
+hasInventoryItemForEquip = function(itemName) -- [PRINCE HUB v18] see forward declaration
 	return inventoryTextContains(itemName) or hotbarOrBackpackHasItem(itemName)
 end
 
@@ -25795,6 +25870,11 @@ pcall(function()
 	end
 end)
 
+-- [PRINCE HUB v18] forward declaration: the block below runs 3s later and reads _G_Hub,
+-- but the table is created further down. Before this it always read nil, so DISABLE3DRENDER
+-- in the Config never called makeBattleRoyaleGraphicsUgly.
+local _G_Hub
+
 -- Apply DISABLE3DRENDER after hub is loaded
 if DefaultConfig.SETTINGS.OPTIMIZATION.DISABLE3DRENDER then
 	task.spawn(function()
@@ -29460,6 +29540,7 @@ local Library = (function()
 			local FadeTime = Config.MenuFadeTime;
 			Fading = true;
 			Toggled = (not Toggled);
+			Library.Toggled = Toggled; -- [PRINCE HUB v18] so other code can know if the menu is open
 			ModalElement.Modal = Toggled;
 
 			if Toggled then
@@ -30116,7 +30197,7 @@ end
 -- ============================================================
 -- SHARED GLOBALS & KEY TRACKING & ANTI-AFK
 -- ============================================================
-local _G_Hub = {}
+_G_Hub = {} -- [PRINCE HUB v18] see forward declaration near DISABLE3DRENDER
 do
 	local Players          = game:GetService("Players")
 	local RunService       = game:GetService("RunService")
@@ -32539,7 +32620,14 @@ local function initPlayerESP()
 			if not _getasset then
 				_getasset = function(path) return "rbxasset://" .. path end
 			end
-			Font = setreadonly(Font, false);
+			-- [PRINCE HUB v18] some executors' setreadonly returns nothing, and "Font = setreadonly(...)"
+			-- turned Font into nil and crashed the whole hub. Now it only unlocks it, and the
+			-- custom font part is optional (falls back to RobotoMono below).
+			pcall(function()
+				local unlocked = setreadonly(Font, false)
+				if type(unlocked) == "table" then Font = unlocked end
+			end)
+			pcall(function()
 			function Font:Register(Name, Weight, Style, Asset)
 				if not isfile(Name .. ".font") then
 					if not isfile(Asset.Id) then writefile(Asset.Id, Asset.Font); end;
@@ -32552,9 +32640,11 @@ local function initPlayerESP()
 				if isfile(Name .. ".font") then return _getasset(Name .. ".font"); end;
 			end;
 			Font:Register("proggyclean", 400, "normal", {Id = "proggyclean.ttf", Font = ""});
+			end) -- [PRINCE HUB v18] end of optional font part
 		end
 
-		local _fontReg = Font:GetRegistry("proggyclean")
+		local _fontReg = nil
+		pcall(function() if Font.GetRegistry then _fontReg = Font:GetRegistry("proggyclean") end end)
 		local text_font = _fontReg and Font.new(_fontReg) or Font.new("rbxasset://fonts/families/RobotoMono.json");
 		local screen_gui = funcs:create("ScreenGui", { Parent = core_gui, ResetOnSpawn = false, IgnoreGuiInset = true })
 		_G_Hub.esp_screen_gui = screen_gui 
@@ -35863,13 +35953,15 @@ local function initIslandESP()
 	end)
 end
 
-initChestESP()
-initMachineESP()
-initPlayerESP()
-initIslandESP()
-initNoStun()
-initSkinChanger()
-initNameChanger()
+-- [PRINCE HUB v18] each feature starts on its own: if one fails (executor without some API),
+-- it is written to the error log and the rest of the hub (and the UI) still loads.
+PH_try('init chest ESP', initChestESP)
+PH_try('init machine ESP', initMachineESP)
+PH_try('init player ESP', initPlayerESP)
+PH_try('init island ESP', initIslandESP)
+PH_try('init no stun', initNoStun)
+PH_try('init skin changer', initSkinChanger)
+PH_try('init name changer', initNameChanger)
 
 -- ============================================================
 -- FEATURE: AUTO FARM KAITUN
@@ -39415,11 +39507,16 @@ buildConfigTab()
 SaveManager:LoadAutoloadConfig()
 -- [PRINCE HUB] build the new Kaitun / Cupid / Waves tabs (after autoload so old configs don't touch them)
 do
-	local ok, err = pcall(PrinceNewTabs.build, Library, Tabs, Window, SaveManager)
-	if not ok then Library:Notify('New tabs error: ' .. tostring(err), 10) end
+	local ok, err = PH_try('new tabs', PrinceNewTabs.build, Library, Tabs, Window, SaveManager) -- [PRINCE HUB v18]
+	if not ok then Library:Notify('New tabs error: ' .. tostring(err):gsub('\n.*', ''), 10) end
 	PrinceNewTabs.built = true
 end
-Library:Notify('Prince Hub loaded.', 4)
+-- [PRINCE HUB v18] the run guard at the top of the file checks this to avoid loading twice
+getgenv().PrinceHubInstance = {
+	version = PRINCE_HUB_VERSION,
+	alive = function() return Library.ScreenGui ~= nil and Library.ScreenGui.Parent ~= nil end,
+}
+Library:Notify('Prince Hub ' .. PRINCE_HUB_VERSION .. ' loaded.', 4)
 
 -- ============================================================
 -- KAITUN SEA 2 : auto-join at main menu
@@ -39505,11 +39602,23 @@ task.spawn(function()
 	end
 end)
 
+-- [PRINCE HUB v18] hide the menu only if it is open. Before this, "Auto Hide UI" toggled twice
+-- (saved toggle + Config.AUTO_HIDE_UI) and the menu came back. It also retries if the
+-- open animation is still running (Library:Toggle ignores calls while fading).
+local function hideMenuOnLoad()
+	for _ = 1, 30 do
+		if Library.Toggled ~= true then return end -- already hidden (or never shown)
+		Library:Toggle()
+		if Library.Toggled ~= true then return end
+		task.wait(0.1)
+	end
+end
+
 -- Auto Hide UI: hides the menu automatically on load if enabled
 task.spawn(function()
 	task.wait(0.1)
 	if Toggles and Toggles.AutoHideUIToggle and Toggles.AutoHideUIToggle.Value then
-		Library:Toggle()
+		hideMenuOnLoad()
 	end
 end)
 
@@ -39549,7 +39658,7 @@ task.spawn(function()
 	if cfg.AUTO_HIDE_UI and Toggles and Toggles.AutoHideUIToggle then
 		Toggles.AutoHideUIToggle:SetValue(true)
 		task.wait(0.1)
-		Library:Toggle()
+		hideMenuOnLoad()
 	end
 
 	-- Auto Join Sea 2
@@ -39828,10 +39937,11 @@ local PN_HubConfig = nil -- getgenv().Config مال الهب بعد ما يحم�
 local function PN_startModule(id, cfg)
 	getgenv().Config = cfg
 	task.spawn(function()
-		local ok, err = pcall(Modules[id])
+		-- [PRINCE HUB v18] PH_try: يسجل الخطأ ويا مكانه (traceback) بسجل الهب
+		local ok, err = PH_try("module " .. id, Modules[id])
 		if not ok then
 			pcall(function()
-				getgenv().Library:Notify("[" .. id .. "] error: " .. tostring(err), 10)
+				getgenv().Library:Notify("[" .. id .. "] error: " .. PN_cut(tostring(err):gsub("\n.*", ""), 120), 10)
 			end)
 		end
 	end)
@@ -40892,6 +41002,42 @@ function PrinceNewTabs.build(Library, Tabs, Window, SaveManager)
 		end)
 	end
 
+	-- ================= Config: Prince Hub (النسخة + سجل الأخطاء) [PRINCE HUB v18] =================
+	if Tabs.Config then
+		pcall(function()
+			local Box = Tabs.Config:AddRightGroupbox("Prince Hub")
+			Box:AddLabel("Version: " .. PRINCE_HUB_VERSION)
+			local errLabel = Box:AddLabel("Errors: 0")
+			Box:AddButton({
+				Text = "Copy error log",
+				Func = function()
+					local text = PH_Log.report()
+					local copy = setclipboard or toclipboard
+					if copy then
+						pcall(copy, text)
+						notify("Error log copied (" .. #PH_Log.entries .. ")", 3)
+					else
+						print(text)
+						notify("No clipboard: log printed in console (F9)", 4)
+					end
+				end,
+			})
+			Box:AddButton({
+				Text = "Clear error log",
+				Func = function()
+					table.clear(PH_Log.entries)
+					notify("Error log cleared", 2)
+				end,
+			})
+			task.spawn(function()
+				while Library.ScreenGui and Library.ScreenGui.Parent do
+					pcall(function() errLabel:SetText("Errors: " .. #PH_Log.entries) end)
+					task.wait(2)
+				end
+			end)
+		end)
+	end
+
 	-- ================= TAB: KAITUN =================
 	if Tabs.NewKaitun then
 		local T = Tabs.NewKaitun
@@ -41830,9 +41976,6 @@ end
 -- ############################################################
 PrinceNewTabs.prepareHubConfig()
 
-local hubOk, hubErr = pcall(Modules.Hub)
-if not hubOk then
-	warn("[Prince Hub] Hub UI error: " .. tostring(hubErr))
-end
+local hubOk = PH_try("Hub UI", Modules.Hub) -- [PRINCE HUB v18] يسجل الخطأ بسجل الهب
 
 PrinceNewTabs.boot()

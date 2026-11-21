@@ -1,0 +1,28 @@
+# Prince Hub: يفحص السكربت بكل push (سنتاكس Luau + حدود Luau + المتغيرات + الاختبارات)
+# ويتأكد إن dist/PrinceHub_AllInOne.lua مبني من آخر نسخة من src/.
+name: Prince Hub check
+
+on:
+  push:
+    paths: ["PrinceHub/**", ".github/workflows/princehub.yml"]
+  pull_request:
+    paths: ["PrinceHub/**", ".github/workflows/princehub.yml"]
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: PrinceHub
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci
+      - run: npm test
+      - name: dist is up to date
+        run: |
+          node tools/build.js
+          git diff --exit-code -- dist/ || (echo "dist/ is out of date: run 'node tools/build.js' and commit" && exit 1)

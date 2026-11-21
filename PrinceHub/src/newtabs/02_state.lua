@@ -150,10 +150,11 @@ local PN_HubConfig = nil -- getgenv().Config مال الهب بعد ما يحم�
 local function PN_startModule(id, cfg)
 	getgenv().Config = cfg
 	task.spawn(function()
-		local ok, err = pcall(Modules[id])
+		-- [PRINCE HUB v18] PH_try: يسجل الخطأ ويا مكانه (traceback) بسجل الهب
+		local ok, err = PH_try("module " .. id, Modules[id])
 		if not ok then
 			pcall(function()
-				getgenv().Library:Notify("[" .. id .. "] error: " .. tostring(err), 10)
+				getgenv().Library:Notify("[" .. id .. "] error: " .. PN_cut(tostring(err):gsub("\n.*", ""), 120), 10)
 			end)
 		end
 	end)

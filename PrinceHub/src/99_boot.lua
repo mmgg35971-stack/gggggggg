@@ -3,9 +3,6 @@
 -- ############################################################
 PrinceNewTabs.prepareHubConfig()
 
-local hubOk, hubErr = pcall(Modules.Hub)
-if not hubOk then
-	warn("[Prince Hub] Hub UI error: " .. tostring(hubErr))
-end
+local hubOk = PH_try("Hub UI", Modules.Hub) -- [PRINCE HUB v18] يسجل الخطأ بسجل الهب
 
 PrinceNewTabs.boot()

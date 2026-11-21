@@ -1855,6 +1855,10 @@ local function ensureBusoOnce()
 		pressKey(Enum.KeyCode.J, 0.08)
 	end)
 end
+-- [PRINCE HUB v18] forward declaration: equipWeapon uses it, but it is defined further down.
+-- Before this, Step 2 (equip from inventory) never ran because the name was nil here.
+local hasInventoryItemForEquip
+
 local function equipWeapon()
 	applyWeaponFromConfig()
 
@@ -3940,7 +3944,7 @@ local function hotbarOrBackpackHasItem(itemName)
 		or scan(inventoryFrame)
 end
 
-local function hasInventoryItemForEquip(itemName)
+hasInventoryItemForEquip = function(itemName) -- [PRINCE HUB v18] see forward declaration
 	return inventoryTextContains(itemName) or hotbarOrBackpackHasItem(itemName)
 end
 

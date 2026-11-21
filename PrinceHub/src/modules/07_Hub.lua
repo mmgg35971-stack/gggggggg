@@ -131,6 +131,11 @@ pcall(function()
 	end
 end)
 
+-- [PRINCE HUB v18] forward declaration: the block below runs 3s later and reads _G_Hub,
+-- but the table is created further down. Before this it always read nil, so DISABLE3DRENDER
+-- in the Config never called makeBattleRoyaleGraphicsUgly.
+local _G_Hub
+
 -- Apply DISABLE3DRENDER after hub is loaded
 if DefaultConfig.SETTINGS.OPTIMIZATION.DISABLE3DRENDER then
 	task.spawn(function()
@@ -3796,6 +3801,7 @@ local Library = (function()
 			local FadeTime = Config.MenuFadeTime;
 			Fading = true;
 			Toggled = (not Toggled);
+			Library.Toggled = Toggled; -- [PRINCE HUB v18] so other code can know if the menu is open
 			ModalElement.Modal = Toggled;
 
 			if Toggled then
@@ -4452,7 +4458,7 @@ end
 -- ============================================================
 -- SHARED GLOBALS & KEY TRACKING & ANTI-AFK
 -- ============================================================
-local _G_Hub = {}
+_G_Hub = {} -- [PRINCE HUB v18] see forward declaration near DISABLE3DRENDER
 do
 	local Players          = game:GetService("Players")
 	local RunService       = game:GetService("RunService")
@@ -6875,7 +6881,14 @@ local function initPlayerESP()
 			if not _getasset then
 				_getasset = function(path) return "rbxasset://" .. path end
 			end
-			Font = setreadonly(Font, false);
+			-- [PRINCE HUB v18] some executors' setreadonly returns nothing, and "Font = setreadonly(...)"
+			-- turned Font into nil and crashed the whole hub. Now it only unlocks it, and the
+			-- custom font part is optional (falls back to RobotoMono below).
+			pcall(function()
+				local unlocked = setreadonly(Font, false)
+				if type(unlocked) == "table" then Font = unlocked end
+			end)
+			pcall(function()
 			function Font:Register(Name, Weight, Style, Asset)
 				if not isfile(Name .. ".font") then
 					if not isfile(Asset.Id) then writefile(Asset.Id, Asset.Font); end;
@@ -6888,9 +6901,11 @@ local function initPlayerESP()
 				if isfile(Name .. ".font") then return _getasset(Name .. ".font"); end;
 			end;
 			Font:Register("proggyclean", 400, "normal", {Id = "proggyclean.ttf", Font = ""});
+			end) -- [PRINCE HUB v18] end of optional font part
 		end
 
-		local _fontReg = Font:GetRegistry("proggyclean")
+		local _fontReg = nil
+		pcall(function() if Font.GetRegistry then _fontReg = Font:GetRegistry("proggyclean") end end)
 		local text_font = _fontReg and Font.new(_fontReg) or Font.new("rbxasset://fonts/families/RobotoMono.json");
 		local screen_gui = funcs:create("ScreenGui", { Parent = core_gui, ResetOnSpawn = false, IgnoreGuiInset = true })
 		_G_Hub.esp_screen_gui = screen_gui 
@@ -10199,13 +10214,15 @@ local function initIslandESP()
 	end)
 end
 
-initChestESP()
-initMachineESP()
-initPlayerESP()
-initIslandESP()
-initNoStun()
-initSkinChanger()
-initNameChanger()
+-- [PRINCE HUB v18] each feature starts on its own: if one fails (executor without some API),
+-- it is written to the error log and the rest of the hub (and the UI) still loads.
+PH_try('init chest ESP', initChestESP)
+PH_try('init machine ESP', initMachineESP)
+PH_try('init player ESP', initPlayerESP)
+PH_try('init island ESP', initIslandESP)
+PH_try('init no stun', initNoStun)
+PH_try('init skin changer', initSkinChanger)
+PH_try('init name changer', initNameChanger)
 
 -- ============================================================
 -- FEATURE: AUTO FARM KAITUN
@@ -13751,11 +13768,16 @@ buildConfigTab()
 SaveManager:LoadAutoloadConfig()
 -- [PRINCE HUB] build the new Kaitun / Cupid / Waves tabs (after autoload so old configs don't touch them)
 do
-	local ok, err = pcall(PrinceNewTabs.build, Library, Tabs, Window, SaveManager)
-	if not ok then Library:Notify('New tabs error: ' .. tostring(err), 10) end
+	local ok, err = PH_try('new tabs', PrinceNewTabs.build, Library, Tabs, Window, SaveManager) -- [PRINCE HUB v18]
+	if not ok then Library:Notify('New tabs error: ' .. tostring(err):gsub('\n.*', ''), 10) end
 	PrinceNewTabs.built = true
 end
-Library:Notify('Prince Hub loaded.', 4)
+-- [PRINCE HUB v18] the run guard at the top of the file checks this to avoid loading twice
+getgenv().PrinceHubInstance = {
+	version = PRINCE_HUB_VERSION,
+	alive = function() return Library.ScreenGui ~= nil and Library.ScreenGui.Parent ~= nil end,
+}
+Library:Notify('Prince Hub ' .. PRINCE_HUB_VERSION .. ' loaded.', 4)
 
 -- ============================================================
 -- KAITUN SEA 2 : auto-join at main menu
@@ -13841,11 +13863,23 @@ task.spawn(function()
 	end
 end)
 
+-- [PRINCE HUB v18] hide the menu only if it is open. Before this, "Auto Hide UI" toggled twice
+-- (saved toggle + Config.AUTO_HIDE_UI) and the menu came back. It also retries if the
+-- open animation is still running (Library:Toggle ignores calls while fading).
+local function hideMenuOnLoad()
+	for _ = 1, 30 do
+		if Library.Toggled ~= true then return end -- already hidden (or never shown)
+		Library:Toggle()
+		if Library.Toggled ~= true then return end
+		task.wait(0.1)
+	end
+end
+
 -- Auto Hide UI: hides the menu automatically on load if enabled
 task.spawn(function()
 	task.wait(0.1)
 	if Toggles and Toggles.AutoHideUIToggle and Toggles.AutoHideUIToggle.Value then
-		Library:Toggle()
+		hideMenuOnLoad()
 	end
 end)
 
@@ -13885,7 +13919,7 @@ task.spawn(function()
 	if cfg.AUTO_HIDE_UI and Toggles and Toggles.AutoHideUIToggle then
 		Toggles.AutoHideUIToggle:SetValue(true)
 		task.wait(0.1)
-		Library:Toggle()
+		hideMenuOnLoad()
 	end
 
 	-- Auto Join Sea 2

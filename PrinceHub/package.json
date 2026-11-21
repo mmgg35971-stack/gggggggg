@@ -5,9 +5,11 @@
   "description": "Prince Hub (GPO) - source split into modules, built into a single Lua file",
   "scripts": {
     "build": "node tools/build.js",
-    "check": "node tools/build.js --check-only"
+    "check": "node tools/build.js --check-only",
+    "test": "node tools/build.js --check-only && node tests/test_core.js && node tests/test_autohide.js"
   },
   "devDependencies": {
+    "fengari": "0.1.4",
     "luaparse": "0.3.1"
   }
 }
