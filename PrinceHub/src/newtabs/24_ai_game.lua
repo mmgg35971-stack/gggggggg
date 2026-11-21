@@ -66,6 +66,22 @@ function PrinceAI.sense(now)
 		-- آخر مكان آمن (مو دا يطيح وفوق الفراغ) حتى نرجعله
 		if (s.vy or 0) > -40 and p.Y > -30 and s.alive ~= false then PrinceAI.lastSafe = p end
 	end
+	-- السلاح: أداة بيد الشخصية (Tool)
+	if char then s.toolEquipped = char:FindFirstChildOfClass("Tool") ~= nil end
+	-- لاعبين قريبين (150 ستد)
+	if hrp then
+		local near = 0
+		pcall(function()
+			for _, pl in ipairs(game:GetService("Players"):GetPlayers()) do
+				if pl ~= PN_LocalPlayer and pl.Character then
+					local r = pl.Character:FindFirstChild("HumanoidRootPart")
+					if r and (r.Position - hrp.Position).Magnitude < 150 then near = near + 1 end
+				end
+			end
+		end)
+		s.playersNear = near
+	end
+	pcall(function() s.memMb = game:GetService("Stats"):GetTotalMemoryUsageMb() end)
 	s.died = PrinceAI.died
 	PrinceAI.died = false
 	s.fps = PrinceAI.fps
@@ -89,6 +105,10 @@ function PrinceAI.sense(now)
 	end
 	s.progress.level = PN_statValue("Level")
 	s.progress.peli = PN_statValue("Peli")
+	-- الهدف: Kaitun وصل اللفل المطلوب
+	if Kaitun.enabled == true and s.progress.level and tonumber(Kaitun.level) then
+		s.goalReached = s.progress.level >= tonumber(Kaitun.level)
+	end
 
 	-- الأخطاء الجديدة من سجل الهب، ومن نظام فحص Auto Impel (test)
 	local total = PH_Log.total
@@ -171,6 +191,34 @@ PrinceAI.ACT = {
 		hrp.CFrame = CFrame.new(target + Vector3.new(0, 10, 0))
 		return true, "back to last safe spot"
 	end,
+	emergency_lift = function()
+		local hrp = aiRoot()
+		if not hrp then return false, "no character" end
+		hrp.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+		hrp.CFrame = hrp.CFrame + Vector3.new(0, 120, 0)
+		return true, "emergency lift 120"
+	end,
+	equip_weapon = function()
+		local _, hum = aiRoot()
+		local backpack = PN_LocalPlayer:FindFirstChildOfClass("Backpack")
+		if not (hum and backpack) then return false, "no backpack" end
+		-- السلاح المختار بالتبويبات أول، وإلا أول أداة
+		local wanted = { Waves.weapon, Cupid.weapon }
+		local tool = nil
+		for _, name in ipairs(wanted) do
+			if type(name) == "string" and name ~= "" then
+				tool = backpack:FindFirstChild(name)
+				if tool then break end
+			end
+		end
+		tool = tool or backpack:FindFirstChildOfClass("Tool")
+		if not tool then return false, "no tool in backpack" end
+		hum:EquipTool(tool)
+		return true, "equipped " .. tool.Name
+	end,
+	wait = function()
+		return true, "waiting (doing nothing)"
+	end,
 	retreat_up = function()
 		local hrp = aiRoot()
 		if not hrp then return false, "no character" end
@@ -239,7 +287,8 @@ function PrinceAI.run(plan, auto)
 	end
 	if done then
 		B:executed(plan, auto)
-		PrinceAI.say(PrinceAICore.t(PrinceAI.lang, plan.action) .. " <- " .. PrinceAICore.t(PrinceAI.lang, plan.diag), 5)
+		PrinceAI.say(PrinceAICore.t(PrinceAI.lang, plan.action) .. " <- " .. PrinceAICore.t(PrinceAI.lang, plan.diag)
+			.. " / " .. PrinceAICore.t(PrinceAI.lang, "cause_" .. tostring(plan.cause or "general")), 5)
 	else
 		-- ما انفذ: cooldown قصير حتى ما يعيد كل ثانية
 		B.cooldowns[plan.action] = B.now + 30
@@ -377,11 +426,14 @@ function PrinceAI.buildTab(T, Library)
 		Func = function()
 			local B = PrinceAI.brain
 			if not B then notify("[AI] not running", 3) return end
-			local lines = { "Prince AI " .. PrinceAICore.VERSION .. " | " .. B:summary(), "Plan: " .. B:planText() }
+			local lines = { "Prince AI " .. PrinceAICore.VERSION .. " | " .. B:summary(), "Plan: " .. B:planText(), "Options:" }
+			for i, o in ipairs(B.options) do
+				lines[#lines + 1] = string.format("  %d) %s <- %s/%s score %.2f", i, o.action, o.diag, o.cause, o.score)
+			end
 			for _, l in ipairs(B:explain(60)) do lines[#lines + 1] = l end
 			lines[#lines + 1] = "history:"
 			for _, h in ipairs(B.history) do
-				lines[#lines + 1] = string.format("  %ds ago %s -> %s (%s%s)", math.floor(B.now - h.t), h.diag, h.action, h.result, h.auto and ", auto" or "")
+				lines[#lines + 1] = string.format("  %ds ago %s/%s -> %s (%s%s)", math.floor(B.now - h.t), h.diag, tostring(h.cause), h.action, h.result, h.auto and ", auto" or "")
 			end
 			local text = table.concat(lines, "\n")
 			local copy = setclipboard or toclipboard
@@ -389,12 +441,13 @@ function PrinceAI.buildTab(T, Library)
 		end,
 	})
 
-	local Why = T:AddRightGroupbox("Reasoning (why)")
+	local Why = T:AddRightGroupbox("Thinking tree (why)")
 	local lWhy = Why:AddLabel("-", true)
 
 	local Ask = T:AddRightGroupbox("Ask the AI")
-	Ask:AddLabel("why / status / advice / errors", true)
-	Ask:AddLabel("progress / fps / learn  (or Arabic)", true)
+	Ask:AddLabel("why / cause / plan / tree / history", true)
+	Ask:AddLabel("advice / errors / progress / fps / learn", true)
+	Ask:AddLabel("(or Arabic: ليش / سبب / خطة / شجرة / شسويت)", true)
 	local lAnswer
 	Ask:AddInput("PN_AIAsk", {
 		Text = "Question", Default = "", Placeholder = "ليش واكف؟  /  what should I do?", Numeric = false, Finished = true,

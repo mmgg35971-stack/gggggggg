@@ -33,7 +33,8 @@ HRP = { AssemblyLinearVelocity = Vector3.new(0, 0, 0) }
 HRP.CFrame = CFrame.new(10, 100, 10)
 setmetatable(HRP, { __index = function(t, k) if k == "Position" then return rawget(t, "CFrame").Position end end })
 HUM = { Health = 1000, MaxHealth = 1000, Died = signal() }
-local CHAR = { FindFirstChildOfClass = function(_, c) return c == "Humanoid" and HUM or nil end,
+TOOL = { Name = "Katana" }
+local CHAR = { FindFirstChildOfClass = function(_, c) if c == "Humanoid" then return HUM end if c == "Tool" then return TOOL end end,
   FindFirstChild = function(_, n) return n == "HumanoidRootPart" and HRP or nil end,
   WaitForChild = function() return HUM end }
 PN_LocalPlayer = { Name = "Tester", Character = CHAR, CharacterAdded = signal(), GetNetworkPing = function() return 0.05 end }

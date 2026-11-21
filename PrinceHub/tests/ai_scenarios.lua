@@ -120,7 +120,7 @@ end
 -- 9) ماكو تقدم + سيرفر قديم -> no_progress و server_degraded، وما يسوي rejoin بالدنجن
 do
 	local gen = function(t)
-		local s = base(t); s.pos = { x = (t % 2) * 50, y = 100, z = 0 }; s.serverAge = 6 * 3600; return s
+		local s = base(t); s.pos = { x = t * 10, y = 100, z = 0 }; s.serverAge = 6 * 3600; return s
 	end
 	local b = AI.newBrain()
 	sim(b, 1, 600, gen)
@@ -157,14 +157,88 @@ do
 	check("deaths: dying_repeatedly", cf(b, "dying_repeatedly") >= 0.55, cf(b, "dying_repeatedly"))
 end
 
--- 12) الدم ديقل بسرعة = خطر
+-- 12) الدم ديقل بسرعة = خطر، وفرعين: قريب يموت (رفع طوارئ تلقائي) / بوس يضرب (انسحاب يحتاجك)
 do
 	local b = AI.newBrain()
 	local plan = sim(b, 1, 12, function(t)
 		local s = base(t); s.pos = { x = t * 10, y = 100, z = 0 }; s.progress = { k = t }; s.hp = math.max(50, 1000 - t * 80); return s
 	end)
 	check("danger: detected", cf(b, "danger") >= 0.55, cf(b, "danger"))
-	check("danger: retreat is suggest-only", plan and plan.action == "retreat_up" and plan.auto == false, plan and plan.action)
+	check("danger: branch imminent_death", plan and plan.cause == "imminent_death", plan and plan.cause)
+	check("danger: emergency lift is automatic", plan and plan.action == "emergency_lift" and plan.auto == true, plan and plan.action)
+	local b2 = AI.newBrain()
+	local plan2 = sim(b2, 1, 14, function(t)
+		local s = base(t); s.pos = { x = t * 10, y = 100, z = 0 }; s.target = "Kelvin"
+		s.hp = (t < 8) and 1000 or math.max(200, 1000 - (t - 7) * 110); return s
+	end)
+	check("danger: boss branch", plan2 and (plan2.cause == "boss_burst" or plan2.cause == "imminent_death"), plan2 and plan2.cause)
+end
+
+-- 12b) فروع "علكان": يروح ويرجع / يحوم / ماكو سلاح
+do
+	local b = AI.newBrain()
+	local plan = sim(b, 1, 40, function(t) local s = base(t); s.pos = { x = (t % 2) * 30, y = 100, z = 0 }; return s end)
+	check("stuck branch: path blocked (back and forth)", plan and plan.diag == "stuck" and plan.cause == "path_blocked", plan and (plan.diag .. "/" .. plan.cause))
+	local b2 = AI.newBrain()
+	local plan2 = sim(b2, 1, 40, function(t) local s = base(t); s.pos = { x = 0, y = 100 + ((t % 2) * 3), z = 0 }; return s end)
+	check("stuck: still detected while bobbing", cf(b2, "stuck") >= 0.55, cf(b2, "stuck"))
+	local b3 = AI.newBrain()
+	local plan3 = sim(b3, 1, 40, function(t) local s = base(t); s.toolEquipped = false; return s end)
+	check("stuck branch: no weapon -> equip", plan3 and plan3.cause == "no_weapon" and plan3.action == "equip_weapon", plan3 and (plan3.cause .. "/" .. plan3.action))
+	check("options: several alternatives", #b3.options >= 2, #b3.options)
+end
+
+-- 12c) فروع الأداء: رام عالي -> سيرفر ثاني، جرافيك -> واطي
+do
+	local b = AI.newBrain()
+	local plan = sim(b, 1, 20, function(t) local s = base(t); s.pos = { x = t * 10, y = 100, z = 0 }; s.progress = { k = t }; s.fps = 9; s.memMb = 5000; return s end)
+	check("perf branch: memory -> rejoin", b.causes.low_performance and b.causes.low_performance[1].id == "memory" and plan and plan.action == "rejoin", plan and plan.action)
+	local b2 = AI.newBrain()
+	local plan2 = sim(b2, 1, 20, function(t) local s = base(t); s.pos = { x = t * 10, y = 100, z = 0 }; s.progress = { k = t }; s.fps = 9; s.memMb = 1200; return s end)
+	check("perf branch: render -> low graphics", plan2 and plan2.cause == "render_heavy" and plan2.action == "low_graphics", plan2 and plan2.action)
+end
+
+-- 12d) لاك متقطع -> ينتظر (ما يصرف من الميزانية)
+do
+	local b = AI.newBrain()
+	local plan = sim(b, 1, 30, function(t) local s = base(t); s.pos = { x = t * 10, y = 100, z = 0 }; s.progress = { k = t }; s.ping = (t % 2 == 0) and 1400 or 300; return s end)
+	check("lag branch: spiky -> wait", plan and plan.cause == "spiky" and plan.action == "wait", plan and (tostring(plan.cause) .. "/" .. plan.action))
+	if plan then b:executed(plan, true) end
+	check("wait is free (budget kept)", b:budgetLeft() == 6, b:budgetLeft())
+end
+
+-- 12e) الهدف تحقق / ينتظر هواية / الهدف ما ياخذ ضرر
+do
+	local b = AI.newBrain()
+	local plan = sim(b, 1, 5, function(t) local s = base(t); s.pos = { x = t * 10, y = 100, z = 0 }; s.goalReached = true; return s end)
+	check("goal reached -> pause (needs you)", plan and plan.diag == "goal_done" and plan.action == "pause_farm" and plan.auto == false, plan and plan.diag)
+	local b2 = AI.newBrain()
+	local plan2 = sim(b2, 1, 700, function(t) local s = base(t); s.placeKind = "menu"; return s end)
+	check("waiting too long in menu -> restart/rejoin", plan2 and plan2.diag == "waiting_too_long" and plan2.cause == "in_menu", plan2 and (plan2.diag .. "/" .. tostring(plan2.cause)))
+	local b3 = AI.newBrain()
+	sim(b3, 1, 600, function(t) local s = base(t); s.pos = { x = t * 10, y = 100, z = 0 }; s.target = "Vera"; s.hp = 1000; return s end)
+	check("same target forever -> target_immune branch", b3.causes.no_progress and b3.causes.no_progress[1].id == "target_immune", b3.causes.no_progress and b3.causes.no_progress[1].id)
+end
+
+-- 12f) الفارم يبطأ (تقدم أقل من قبل)
+do
+	local b = AI.newBrain()
+	sim(b, 1, 900, function(t)
+		local s = base(t); s.pos = { x = t * 10, y = 100, z = 0 }
+		local k = (t < 600) and math.floor(t / 10) or (60 + math.floor((t - 600) / 90))
+		s.progress = { k = k }; return s
+	end)
+	check("slowing down detected", cf(b, "slowing_down") >= 0.55, cf(b, "slowing_down"))
+end
+
+-- 12g) التعلم على مستويين: السبب الجديد يستفيد من خبرة المشكلة
+do
+	local b = AI.newBrain({ stats = { ["stuck|unstick"] = { s = 0, n = 4 } } })
+	local e, n, from = b:expected("stuck", "unstick", "path_blocked")
+	check("hierarchical learning: falls back to problem stats", from == "problem" and n == 4 and e < 0.3, from)
+	b.stats["stuck/path_blocked|unstick"] = { s = 3, n = 3 }
+	local e2, _, from2 = b:expected("stuck", "unstick", "path_blocked")
+	check("hierarchical learning: cause stats win", from2 == "cause" and e2 > 0.7, from2)
 end
 
 -- 13) الميزانية والـ cooldown
@@ -181,6 +255,10 @@ end
 do
 	local b = AI.newBrain({ lang = "AR" })
 	sim(b, 1, 40, function(t) return base(t) end)
+	local cz = b:answer("شنو السبب")
+	check("ask AR cause: lists branches", string.find(cz, "عام", 1, true) ~= nil, cz)
+	check("ask tree", string.find(b:answer("شجرة"), "cause:", 1, true) ~= nil)
+	check("ask plan: options", string.find(b:answer("plan"), "1)", 1, true) ~= nil, b:answer("plan"))
 	local a = b:answer("ليش واكف؟")
 	check("ask AR why: names the problem", string.find(a, "علكان", 1, true) ~= nil, a)
 	check("ask AR why: gives reasons", string.find(a, "still", 1, true) ~= nil, a)

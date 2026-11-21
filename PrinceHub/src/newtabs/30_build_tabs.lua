@@ -61,6 +61,18 @@ function PrinceNewTabs.build(Library, Tabs, Window, SaveManager)
 		pcall(function()
 			local Box = Tabs.Config:AddRightGroupbox("Prince Hub")
 			Box:AddLabel("Version: " .. PRINCE_HUB_VERSION)
+			Box:AddDropdown("PN_UITheme", { -- [PRINCE HUB v20]
+				Values = { "Halloween", "Classic" }, Default = PrinceNewTabs.theme, Multi = false,
+				Text = "Theme (next load)",
+				Callback = function(v)
+					if v ~= "Halloween" and v ~= "Classic" then return end
+					if US.theme ~= v then
+						US.theme = v
+						PN_save()
+						notify("Theme " .. v .. ": re-execute the script to apply", 5)
+					end
+				end,
+			})
 			local errLabel = Box:AddLabel("Errors: 0")
 			Box:AddButton({
 				Text = "Copy error log",
@@ -1013,5 +1025,8 @@ function PrinceNewTabs.build(Library, Tabs, Window, SaveManager)
 		end
 		SaveManager:SetIgnoreIndexes(ids)
 	end)
+
+	-- [PRINCE HUB v20] Halloween look (after every tab and groupbox exists)
+	PH_try("Halloween UI", PN_Halloween.apply, Library)
 end
 

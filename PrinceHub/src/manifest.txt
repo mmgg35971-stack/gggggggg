@@ -20,6 +20,7 @@ newtabs/21_stats_overlay.lua
 newtabs/22_ui_scale.lua
 newtabs/23_ai_core.lua
 newtabs/24_ai_game.lua
+newtabs/25_halloween_ui.lua
 newtabs/30_build_tabs.lua
 newtabs/40_boot.lua
 99_boot.lua

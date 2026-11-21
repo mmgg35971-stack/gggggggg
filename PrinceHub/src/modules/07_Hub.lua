@@ -3968,6 +3968,11 @@ local Library = (function()
 	return Library
 end)()
 
+-- [PRINCE HUB v20] Halloween theme: palette before the window is created (src/newtabs/25_halloween_ui.lua)
+if PrinceNewTabs.theme == "Halloween" and PrinceNewTabs.applyPalette then
+	pcall(PrinceNewTabs.applyPalette, Library)
+end
+
 local ThemeManager = (function()
 	local httpService = game:GetService('HttpService')
 	local ThemeManager = {} do
@@ -3978,6 +3983,7 @@ local ThemeManager = (function()
 		ThemeManager.DefaultTheme = 'Default'
 		ThemeManager.BuiltInThemes = {
 			['Default'] = { 1, httpService:JSONDecode('{"FontColor":"e9edfa","MainColor":"24273a","AccentColor":"f5bde6","BackgroundColor":"1e2030","OutlineColor":"363a4f"}') },
+			['Halloween'] = { 2, httpService:JSONDecode('{"FontColor":"fff0ff","MainColor":"1a0b2e","AccentColor":"ff7d14","BackgroundColor":"10081c","OutlineColor":"7819be"}') }, -- [PRINCE HUB v20]
 		}
 
 		function ThemeManager:ApplyTheme(theme)
@@ -12303,7 +12309,7 @@ local function buildConfigTab()
 	SaveManager:BuildConfigSection(Tabs.Config); ThemeManager:ApplyToTab(Tabs.Config)
 
 	-- Force apply the Default theme on every load (no other themes exist)
-	pcall(function() ThemeManager:ApplyTheme('Default') end)
+	pcall(function() ThemeManager:ApplyTheme(PrinceNewTabs.theme == 'Halloween' and 'Halloween' or 'Default') end) -- [PRINCE HUB v20]
 end
 
 -- ============================================================
